@@ -15,6 +15,7 @@ public class CourseResponse {
     private String category;
     private String title;
     private String description;
+    private String japaneseTag;
     private int totalLessons;
     private int freeLessonsCount;
 }

@@ -28,6 +28,13 @@ export async function createCourse(data: CreateCourseData): Promise<Course> {
   });
 }
 
+export async function updateCourse(courseId: number, data: CreateCourseData): Promise<Course> {
+  return request<Course>(`/api/courses/${courseId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
 export async function deleteCourse(courseId: number): Promise<void> {
   return request<void>(`/api/courses/${courseId}`, {
     method: 'DELETE',

@@ -4,6 +4,7 @@ export interface Course {
   category?: string;
   title: string;
   description: string;
+  japaneseTag?: string;
   totalLessons: number;
   freeLessonsCount: number;
 }
@@ -12,6 +13,7 @@ export interface CreateCourseData {
   category: string;
   title: string;
   description: string;
+  japaneseTag?: string;
 }
 
 export interface CreateLessonData {

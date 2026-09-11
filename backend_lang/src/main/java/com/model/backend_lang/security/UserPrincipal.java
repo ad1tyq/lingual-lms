@@ -17,6 +17,7 @@ public class UserPrincipal implements UserDetails {
 
     private final Long id;
     private final String email;
+    private final String actualUsername;
     private final String password;
     private final SubscriptionStatus subscriptionStatus;
     private final Collection<? extends GrantedAuthority> authorities;
@@ -30,6 +31,7 @@ public class UserPrincipal implements UserDetails {
         return new UserPrincipal(
                 user.getId(),
                 user.getEmail(),
+                user.getUsername(),
                 user.getPasswordHash(),
                 user.getSubscriptionStatus(),
                 authorities

@@ -47,10 +47,15 @@ public class CourseService {
 
     @Transactional
     public CourseResponse createCourse(CreateCourseRequest request) {
+        String japTag = request.getJapaneseTag() != null && !request.getJapaneseTag().trim().isEmpty()
+                ? request.getJapaneseTag().trim()
+                : null;
+
         Course course = Course.builder()
                 .language(request.getEffectiveCategory())
                 .title(request.getTitle().trim())
                 .description(request.getDescription())
+                .japaneseTag(japTag)
                 .build();
 
         Course saved = courseRepository.save(course);
@@ -65,6 +70,9 @@ public class CourseService {
         course.setLanguage(request.getEffectiveCategory());
         course.setTitle(request.getTitle().trim());
         course.setDescription(request.getDescription());
+        if (request.getJapaneseTag() != null) {
+            course.setJapaneseTag(request.getJapaneseTag().trim());
+        }
 
         Course updated = courseRepository.save(course);
         return mapToCourseResponse(updated);
@@ -127,6 +135,7 @@ public class CourseService {
                 .category(course.getLanguage())
                 .title(course.getTitle())
                 .description(course.getDescription())
+                .japaneseTag(course.getJapaneseTag())
                 .totalLessons(totalLessons)
                 .freeLessonsCount(freeLessons)
                 .build();

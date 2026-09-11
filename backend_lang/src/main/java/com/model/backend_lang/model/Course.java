@@ -28,6 +28,9 @@ public class Course {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "japanese_tag")
+    private String japaneseTag;
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sequenceNo ASC")
     @Builder.Default

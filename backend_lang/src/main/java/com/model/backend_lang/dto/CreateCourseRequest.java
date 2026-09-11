@@ -19,6 +19,7 @@ public class CreateCourseRequest {
     private String title;
 
     private String description;
+    private String japaneseTag;
 
     public String getEffectiveCategory() {
         if (category != null && !category.trim().isEmpty()) {

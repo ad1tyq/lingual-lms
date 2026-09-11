@@ -247,3 +247,264 @@ input, select, textarea {
   border-radius: var(--radius-full);
   letter-spacing: 0.5px;
 }
+
+/* Badge & button text wrapping safeguards */
+.badge-free,
+.badge-pro,
+.badge-blue,
+.course-detail-lang-tag,
+.catalog-kanji-badge {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.catalog-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.catalog-kanji-badge {
+  min-width: 36px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background-color: var(--orenji-light);
+  border: 1px solid var(--orenji-border);
+  color: var(--orenji-primary);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  font-family: 'Noto Sans JP', sans-serif;
+  justify-content: center;
+  line-height: 1;
+}
+
+.catalog-cat-tag {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--blue-primary);
+  line-height: 1.2;
+}
+
+.btn-primary,
+.btn-orenji,
+.btn-secondary {
+  white-space: nowrap;
+}
+
+/* ===================================================
+   Mobile View Optimizations (Navbar & Course Details)
+   =================================================== */
+@media (max-width: 640px) {
+  /* Navbar Mobile Layout */
+  .navbar-container {
+    padding: 0 14px !important;
+    height: 60px !important;
+  }
+
+  .navbar-brand {
+    gap: 8px !important;
+    flex-shrink: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .navbar-logo-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .navbar-logo-text {
+    font-size: 16px !important;
+    letter-spacing: -0.3px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Hide long brand subtitle and kanji tag on small mobile viewports */
+  .navbar-logo-sub {
+    display: none !important;
+  }
+
+  .navbar-kanji-tag {
+    display: none !important;
+  }
+
+  .navbar-auth-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .navbar-auth-btn {
+    padding: 7px 11px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    letter-spacing: -0.2px !important;
+    border-radius: 8px !important;
+  }
+
+  .navbar-user-email {
+    max-width: 90px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+  }
+
+  /* Course Details Page Mobile Layout */
+  .course-detail-container {
+    padding: 16px 14px 60px !important;
+  }
+
+  .course-detail-back {
+    margin-bottom: 16px !important;
+    font-size: 13px !important;
+  }
+
+  .course-detail-hero {
+    padding: 20px 16px !important;
+    margin-bottom: 24px !important;
+    border-radius: 14px !important;
+  }
+
+  .course-detail-badge-row {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .course-detail-lang-tag {
+    font-size: 11px !important;
+    padding: 3px 8px !important;
+    border-radius: 9999px !important;
+    white-space: nowrap !important;
+    letter-spacing: 0.3px !important;
+  }
+
+  .course-detail-title {
+    font-size: 22px !important;
+    line-height: 1.25 !important;
+    margin-bottom: 10px !important;
+    letter-spacing: -0.5px !important;
+  }
+
+  .course-detail-desc {
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+    margin-bottom: 20px !important;
+  }
+
+  /* Course Details Primary CTA Buttons on Mobile: full-width, touch-friendly, aesthetic */
+  .course-detail-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 10px !important;
+  }
+
+  .course-detail-actions button,
+  .course-detail-actions a {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 13px 20px !important;
+    font-size: 15px !important;
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 3px 12px rgba(59, 130, 246, 0.25) !important;
+  }
+
+  .course-detail-actions .btn-orenji {
+    box-shadow: 0 3px 12px rgba(234, 88, 12, 0.25) !important;
+  }
+
+  /* Lesson syllabus rows mobile optimization */
+  .course-detail-lesson-row {
+    padding: 12px 14px !important;
+    gap: 10px !important;
+  }
+
+  .course-detail-seq-badge {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .course-detail-lesson-title {
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+    margin-bottom: 3px !important;
+  }
+
+  .course-detail-lesson-meta {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .course-detail-play-btn {
+    width: 34px !important;
+    height: 34px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Course Catalog Cards Mobile Layout */
+  .catalog-container {
+    padding: 24px 16px 60px !important;
+  }
+
+  .catalog-hero-title {
+    font-size: 26px !important;
+    line-height: 1.2 !important;
+    margin-bottom: 12px !important;
+    letter-spacing: -0.8px !important;
+  }
+
+  .catalog-hero-subtitle {
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+    margin-bottom: 20px !important;
+  }
+
+  .catalog-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .catalog-card {
+    padding: 20px 16px !important;
+    border-radius: 14px !important;
+  }
+
+  .catalog-card-header {
+    gap: 8px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .catalog-kanji-badge {
+    height: 30px !important;
+    min-width: 34px !important;
+    padding: 0 8px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  .catalog-cat-tag {
+    font-size: 12px !important;
+  }
+}

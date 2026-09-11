@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Lock, Mail, ArrowRight, Loader2, Sparkles } from 'lucide-react';
 
@@ -81,15 +81,15 @@ export const LoginPage: React.FC = () => {
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Email Address</label>
+            <label style={styles.label}>{mode === 'login' ? 'Email or Username' : 'Email Address'}</label>
             <div style={styles.inputWrapper}>
               <Mail size={16} style={styles.inputIcon} />
               <input
-                type="email"
+                type={mode === 'login' ? 'text' : 'email'}
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="learner@japan.com"
+                placeholder={mode === 'login' ? 'admin or learner@japan.com' : 'learner@japan.com'}
                 style={styles.input}
               />
             </div>
@@ -131,8 +131,25 @@ export const LoginPage: React.FC = () => {
 
         <button onClick={fillDemoAccount} type="button" style={styles.demoBtn}>
           <Sparkles size={14} color="var(--orenji-primary)" />
-          <span>Auto-fill Demo Credentials</span>
+          <span>Auto-fill Demo Learner Account</span>
         </button>
+
+        <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)', textAlign: 'center' }}>
+          <Link
+            to="/admin"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: 'var(--orenji-primary)',
+              fontSize: '13px',
+              fontWeight: 700,
+              textDecoration: 'none',
+            }}
+          >
+            <span>Admin Portal -&gt;</span>
+          </Link>
+        </div>
       </div>
     </div>
   );

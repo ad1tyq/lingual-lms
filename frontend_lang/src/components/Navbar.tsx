@@ -14,18 +14,18 @@ export const Navbar: React.FC = () => {
 
   return (
     <header style={styles.header}>
-      <div style={styles.container}>
+      <div className="navbar-container" style={styles.container}>
         {/* Brand */}
-        <Link to="/" style={styles.brand}>
-          <div style={styles.logoIcon}>
+        <Link to="/" className="navbar-brand" style={styles.brand}>
+          <div className="navbar-logo-icon" style={styles.logoIcon}>
             <span style={{ fontSize: '18px', fontWeight: 800, color: '#fff' }}>日</span>
           </div>
           <div>
             <div style={styles.brandRow}>
-              <span style={styles.logoText}>Nihon<span style={{ color: 'var(--orenji-primary)' }}>Culture</span></span>
-              <span style={styles.kanjiTag}>日本文化</span>
+              <span className="navbar-logo-text" style={styles.logoText}>Nihon<span style={{ color: 'var(--orenji-primary)' }}>Culture</span></span>
+              <span className="navbar-kanji-tag" style={styles.kanjiTag}>日本文化</span>
             </div>
-            <span style={styles.logoSub}>Japanese Language & Culture Academy</span>
+            <span className="navbar-logo-sub" style={styles.logoSub}>Japanese Language & Culture Academy</span>
           </div>
         </Link>
 
@@ -43,7 +43,7 @@ export const Navbar: React.FC = () => {
               <span>My Account</span>
             </Link>
           )}
-          {user && (user.role === 'ADMIN' || user.email === 'admin@japan.com') && (
+          {user && (user.role === 'ADMIN' || user.email === 'admin@japan.com' || user.username === 'admin') && (
             <Link
               to="/admin"
               style={{
@@ -63,23 +63,23 @@ export const Navbar: React.FC = () => {
           {user ? (
             <div style={styles.userSection}>
               {isPro ? (
-                <div className="badge-pro" style={{ padding: '6px 12px', cursor: 'default' }}>
+                <div className="badge-pro" style={{ padding: '6px 12px', cursor: 'default', whiteSpace: 'nowrap' }}>
                   <Crown size={14} />
                   <span>PRO MEMBER</span>
                 </div>
               ) : (
                 <button
                   onClick={() => openPaywall('Upgrade to PRO to unlock all Japanese Culture & Language lectures!')}
-                  className="btn-orenji"
-                  style={{ padding: '7px 14px', fontSize: '13px' }}
+                  className="btn-orenji navbar-auth-btn"
+                  style={{ padding: '7px 12px', fontSize: '12px', whiteSpace: 'nowrap' }}
                 >
                   <Sparkles size={14} />
-                  <span>Upgrade to PRO</span>
+                  <span>Upgrade</span>
                 </button>
               )}
 
               <div style={styles.userMenu}>
-                <span style={styles.userEmail}>
+                <span className="navbar-user-email" style={styles.userEmail}>
                   <UserIcon size={14} style={{ marginRight: 6, verticalAlign: 'middle' }} />
                   {user.email}
                 </span>
@@ -96,11 +96,11 @@ export const Navbar: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <Link to="/login" className="btn-secondary" style={{ padding: '8px 16px', fontSize: '14px' }}>
+            <div className="navbar-auth-group" style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+              <Link to="/login" className="btn-secondary navbar-auth-btn" style={{ padding: '8px 14px', fontSize: '13px', whiteSpace: 'nowrap' }}>
                 Sign In
               </Link>
-              <Link to="/login?mode=register" className="btn-orenji" style={{ padding: '8px 16px', fontSize: '14px' }}>
+              <Link to="/login?mode=register" className="btn-orenji navbar-auth-btn" style={{ padding: '8px 14px', fontSize: '13px', whiteSpace: 'nowrap' }}>
                 Start Free
               </Link>
             </div>

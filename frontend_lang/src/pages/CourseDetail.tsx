@@ -87,23 +87,28 @@ export const CourseDetail: React.FC = () => {
   }
 
   return (
-    <div style={styles.container}>
-      <Link to="/" style={styles.backLink}>
+    <div className="course-detail-container" style={styles.container}>
+      <Link to="/" className="course-detail-back" style={styles.backLink}>
         <ArrowLeft size={16} /> Back to all categories
       </Link>
 
       {/* Hero Header */}
-      <div style={styles.heroCard}>
-        <div style={styles.heroContent}>
-          <div style={styles.badgeRow}>
-            <span style={styles.langTag}>{course.language}</span>
+      <div className="course-detail-hero" style={styles.heroCard}>
+        <div className="course-detail-content" style={styles.heroContent}>
+          <div className="course-detail-badge-row" style={styles.badgeRow}>
+            {course.japaneseTag && (
+              <span className="catalog-kanji-badge" style={{ height: '26px', minWidth: '34px', fontSize: '12px', padding: '0 8px' }}>
+                {course.japaneseTag}
+              </span>
+            )}
+            <span className="course-detail-lang-tag" style={styles.langTag}>{course.language}</span>
             <span className="badge-free">{course.freeLessonsCount} Free Preview Lessons</span>
           </div>
 
-          <h1 style={styles.title}>{course.title}</h1>
-          <p style={styles.description}>{course.description}</p>
+          <h1 className="course-detail-title" style={styles.title}>{course.title}</h1>
+          <p className="course-detail-desc" style={styles.description}>{course.description}</p>
 
-          <div style={styles.heroActions}>
+          <div className="course-detail-actions" style={styles.heroActions}>
             <button onClick={startFirstLesson} className="btn-primary" style={{ padding: '12px 24px', fontSize: '15px' }}>
               <Play size={18} fill="#fff" />
               <span>{user ? 'Start Course (Lesson #1)' : 'Sign In to Start Course'}</span>
@@ -124,7 +129,7 @@ export const CourseDetail: React.FC = () => {
       </div>
 
       {/* Syllabus Table */}
-      <div style={styles.syllabusSection}>
+      <div className="course-detail-syllabus" style={styles.syllabusSection}>
         <div style={styles.syllabusHeader}>
           <div>
             <h2 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--text-primary)' }}>Category Syllabus & Lectures</h2>
@@ -134,49 +139,47 @@ export const CourseDetail: React.FC = () => {
           </div>
         </div>
 
-        <div style={styles.lessonList}>
+        <div className="course-detail-lesson-list" style={styles.lessonList}>
           {lessons.map((lesson) => (
             <div
               key={lesson.id}
               onClick={() => handleLessonClick(lesson)}
+              className="course-detail-lesson-row"
               style={{
                 ...styles.lessonRow,
                 cursor: 'pointer',
               }}
             >
-              <div style={styles.lessonInfo}>
-                <div style={styles.seqBadge}>#{lesson.sequenceNo}</div>
-                <div>
-                  <h3 style={styles.lessonTitle}>{lesson.title}</h3>
-                  <span style={styles.lessonFormat}>
-                    <Video size={12} style={{ marginRight: 4, verticalAlign: 'middle', color: 'var(--blue-primary)' }} />
-                    Video Lecture Stream
-                  </span>
+              <div className="course-detail-lesson-info" style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
+                <div className="course-detail-seq-badge" style={styles.seqBadge}>#{lesson.sequenceNo}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h3 className="course-detail-lesson-title" style={styles.lessonTitle}>{lesson.title}</h3>
+                  <div className="course-detail-lesson-meta" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: 4 }}>
+                    <span style={styles.lessonFormat}>
+                      <Video size={12} style={{ marginRight: 4, verticalAlign: 'middle', color: 'var(--blue-primary)' }} />
+                      Video Lecture
+                    </span>
+                    {lesson.completed ? (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: '#059669', fontSize: '11px', fontWeight: 700 }}>
+                        <CheckCircle2 size={13} /> Completed
+                      </span>
+                    ) : lesson.free ? (
+                      <span className="badge-free" style={{ fontSize: '10px', padding: '2px 7px' }}>Free Preview</span>
+                    ) : lesson.locked ? (
+                      <span className="badge-pro" style={{ fontSize: '10px', padding: '2px 7px' }}>
+                        <Lock size={10} /> PRO Only
+                      </span>
+                    ) : (
+                      <span className="badge-blue" style={{ fontSize: '10px', padding: '2px 7px' }}>
+                        Unlocked
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div style={styles.lessonRight}>
-                {lesson.completed && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#059669', fontSize: '12px', fontWeight: 600 }}>
-                    <CheckCircle2 size={16} /> Completed
-                  </span>
-                )}
-
-                {lesson.free ? (
-                  <span className="badge-free">Free Preview</span>
-                ) : lesson.locked ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span className="badge-pro">
-                      <Lock size={12} /> PRO Only
-                    </span>
-                  </div>
-                ) : (
-                  <span className="badge-blue">
-                    Unlocked
-                  </span>
-                )}
-
-                <button style={styles.playBtn} title={lesson.locked ? 'Unlock Lecture' : 'Watch Lecture'}>
+              <div className="course-detail-lesson-right" style={{ flexShrink: 0 }}>
+                <button className="course-detail-play-btn" style={styles.playBtn} title={lesson.locked ? 'Unlock Lecture' : 'Watch Lecture'}>
                   {!user || lesson.locked ? <Lock size={16} color="var(--orenji-primary)" /> : <Play size={16} color="var(--blue-primary)" />}
                 </button>
               </div>
@@ -223,7 +226,8 @@ const styles: Record<string, React.CSSProperties> = {
   badgeRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: '8px',
+    flexWrap: 'wrap',
     marginBottom: '16px',
   },
   langTag: {
@@ -236,6 +240,10 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid var(--blue-border)',
     padding: '4px 10px',
     borderRadius: 'var(--radius-full)',
+    whiteSpace: 'nowrap',
+    display: 'inline-flex',
+    alignItems: 'center',
+    flexShrink: 0,
   },
   title: {
     fontSize: '32px',

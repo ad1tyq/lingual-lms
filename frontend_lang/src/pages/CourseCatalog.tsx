@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getCourses } from '../api/courses';
 import type { Course } from '../types/course';
-import { Video, Sparkles, ArrowRight, Layers, Utensils, Compass, BookOpen, Film, Flame } from 'lucide-react';
+import { Sparkles, ArrowRight, Layers, Utensils, Compass, BookOpen, Film, Flame } from 'lucide-react';
 import { CatLogo } from '../components/CatLogo';
 
 export const CourseCatalog: React.FC = () => {
@@ -57,9 +57,9 @@ export const CourseCatalog: React.FC = () => {
   };
 
   return (
-    <div style={styles.container}>
+    <div className="catalog-container" style={styles.container}>
       {/* Hero Banner with Big Cat Logo */}
-      <section style={styles.hero}>
+      <section className="catalog-hero" style={styles.hero}>
         {/* BIG CAT LOGO (Maneki-Neko) */}
         <div style={{ marginBottom: '20px' }}>
           <CatLogo size={145} />
@@ -70,10 +70,10 @@ export const CourseCatalog: React.FC = () => {
           <span>招き猫の日本文化アカデミー • Maneki-Neko Academy</span>
         </div>
 
-        <h1 style={styles.heroTitle}>
+        <h1 className="catalog-hero-title" style={styles.heroTitle}>
           Explore Japanese Culture & <span style={{ color: 'var(--orenji-primary)' }}>Master the Language</span>
         </h1>
-        <p style={styles.heroSubtitle}>
+        <p className="catalog-hero-subtitle" style={styles.heroSubtitle}>
           Immerse yourself in authentic Japanese culture through curated video lectures — from Hiragana & Kanji mastery to traditional Washoku culinary arts, travel secrets, and modern pop culture.
         </p>
 
@@ -121,17 +121,14 @@ export const CourseCatalog: React.FC = () => {
           <p style={{ fontSize: '16px', fontWeight: 600 }}>No categories found matching "{selectedCategory}".</p>
         </div>
       ) : (
-        <div style={styles.grid}>
+        <div className="catalog-grid" style={styles.grid}>
           {filteredCourses.map((course) => (
-            <div key={course.id} style={styles.card} className="animate-fade">
-              <div style={styles.cardHeader}>
-                <div style={styles.kanjiBadge}>
-                  {getCategoryKanji(course.language)}
+            <div key={course.id} style={styles.card} className="catalog-card animate-fade">
+              <div style={styles.cardHeader} className="catalog-card-header">
+                <div style={styles.kanjiBadge} className="catalog-kanji-badge">
+                  {course.japaneseTag || getCategoryKanji(course.language)}
                 </div>
-                <div style={styles.catLabelRow}>
-                  <span style={styles.catTag}>{course.language}</span>
-                  <span className="badge-free">{course.freeLessonsCount} Free Preview</span>
-                </div>
+                <span style={styles.catTag} className="catalog-cat-tag">{course.language}</span>
               </div>
 
               <h2 style={styles.courseTitle}>{course.title}</h2>
@@ -143,10 +140,11 @@ export const CourseCatalog: React.FC = () => {
                   <span>{course.totalLessons} Video Lectures</span>
                 </div>
                 <div style={styles.metaItem}>
-                  <Video size={15} color="var(--orenji-primary)" />
-                  <span style={{ color: 'var(--orenji-primary)', fontWeight: 600 }}>
-                    {course.freeLessonsCount > 0 ? `${course.freeLessonsCount} Free Preview` : 'PRO Content'}
-                  </span>
+                  {course.freeLessonsCount > 0 ? (
+                    <span className="badge-free">{course.freeLessonsCount} Free Preview</span>
+                  ) : (
+                    <span className="badge-pro">PRO Content</span>
+                  )}
                 </div>
               </div>
 
@@ -239,14 +237,14 @@ const styles: Record<string, React.CSSProperties> = {
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-    gap: '28px',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))',
+    gap: '24px',
   },
   card: {
     backgroundColor: 'var(--shiro)',
     borderRadius: 'var(--radius-lg)',
     border: '1px solid var(--border-subtle)',
-    padding: '28px',
+    padding: '24px',
     display: 'flex',
     flexDirection: 'column',
     boxShadow: 'var(--shadow-card)',
@@ -255,28 +253,26 @@ const styles: Record<string, React.CSSProperties> = {
   cardHeader: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    marginBottom: '16px',
+    gap: '10px',
+    marginBottom: '14px',
   },
   kanjiBadge: {
-    width: '42px',
-    height: '42px',
-    borderRadius: '10px',
+    minWidth: '38px',
+    height: '32px',
+    padding: '0 8px',
+    borderRadius: '8px',
     backgroundColor: 'var(--orenji-light)',
     border: '1px solid var(--orenji-border)',
     color: 'var(--orenji-primary)',
-    display: 'flex',
+    display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '16px',
+    fontSize: '13px',
     fontWeight: '800',
+    letterSpacing: '0.4px',
+    whiteSpace: 'nowrap',
     flexShrink: 0,
-  },
-  catLabelRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    flexWrap: 'wrap',
+    fontFamily: "'Noto Sans JP', sans-serif",
   },
   catTag: {
     fontSize: '13px',
@@ -284,6 +280,7 @@ const styles: Record<string, React.CSSProperties> = {
     textTransform: 'uppercase',
     letterSpacing: '0.6px',
     color: 'var(--blue-primary)',
+    lineHeight: 1.2,
   },
   courseTitle: {
     fontSize: '20px',

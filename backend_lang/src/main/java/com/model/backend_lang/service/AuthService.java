@@ -51,14 +51,14 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request) {
-        String normalizedEmail = request.getEmail().trim().toLowerCase();
+        String identifier = request.getEmail().trim().toLowerCase();
 
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(normalizedEmail, request.getPassword())
+                new UsernamePasswordAuthenticationToken(identifier, request.getPassword())
         );
 
-        User user = userRepository.findByEmail(normalizedEmail)
-                .orElseThrow(() -> new BadRequestException("Invalid email or password"));
+        User user = userRepository.findByEmailOrUsername(identifier)
+                .orElseThrow(() -> new BadRequestException("Invalid email/username or password"));
 
         String token = jwtService.generateToken(user);
 
@@ -67,6 +67,7 @@ public class AuthService {
                 .tokenType("Bearer")
                 .userId(user.getId())
                 .email(user.getEmail())
+                .username(user.getUsername())
                 .subscriptionStatus(user.getSubscriptionStatus())
                 .role(user.getRole())
                 .build();
