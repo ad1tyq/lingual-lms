@@ -1,0 +1,249 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+
+:root {
+  --font-family: 'Plus Jakarta Sans', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Japanese Minimalist Palette: Shiro (White) + Aoi (Indigo Blue) + Orenji (Orange) */
+  --bg-app: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F1F5F9;
+  --bg-elevated: #F1F5F9;
+  --bg-subtle: #F8FAFC;
+  
+  --border-subtle: #E2E8F0;
+  --border-focus: #3B82F6;
+  --border-orenji: rgba(249, 115, 22, 0.4);
+
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+
+  /* Blue / Indigo (Aoi 藍・青) - Lighter, modern Japanese blue */
+  --blue-primary: #3B82F6;
+  --blue-hover: #2563EB;
+  --blue-light: #EFF6FF;
+  --blue-border: #BFDBFE;
+  --blue-glow: rgba(59, 130, 246, 0.22);
+
+  /* Orenji (Orange オレンジ) */
+  --orenji-primary: #EA580C;
+  --orenji-vibrant: #F97316;
+  --orenji-light: #FFF7ED;
+  --orenji-border: #FFEDD5;
+  --orenji-glow: rgba(234, 88, 12, 0.2);
+  --orenji-gradient: linear-gradient(135deg, #EA580C 0%, #F97316 100%);
+
+  /* Shiro (White 白) */
+  --shiro: #FFFFFF;
+
+  /* Aliases for Orenji / Warm Gold compatibility */
+  --gold: #EA580C;
+  --border-gold: #FFEDD5;
+  --shadow-gold: var(--shadow-orenji);
+  --primary: var(--blue-primary);
+  --primary-glow: var(--blue-glow);
+  --primary-gradient: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
+
+  /* Status Colors */
+  --emerald: #059669;
+  --emerald-bg: #ECFDF5;
+  --emerald-border: #A7F3D0;
+
+  --danger: #DC2626;
+  --danger-bg: #FEF2F2;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-hover: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+  --shadow-orenji: 0 4px 20px -2px rgba(234, 88, 12, 0.25);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input, select, textarea {
+  font-family: inherit;
+  outline: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-app);
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+/* Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--blue-primary);
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px var(--blue-glow);
+}
+.btn-primary:hover {
+  background-color: var(--blue-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px var(--blue-glow);
+}
+
+.btn-orenji,
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--orenji-gradient);
+  color: #fff;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-orenji);
+}
+.btn-orenji:hover,
+.btn-gold:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(234, 88, 12, 0.35);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--shiro);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+.btn-secondary:hover {
+  background-color: var(--bg-card-hover);
+  border-color: #CBD5E1;
+}
+
+.btn-success {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--emerald);
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+}
+.btn-success:hover {
+  filter: brightness(1.08);
+}
+
+/* Badges */
+.badge-free {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: var(--emerald-bg);
+  border: 1px solid var(--emerald-border);
+  color: #047857;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.5px;
+}
+
+.badge-pro {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: var(--orenji-light);
+  border: 1px solid #FED7AA;
+  color: var(--orenji-primary);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.5px;
+}
+
+.badge-blue {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: var(--blue-light);
+  border: 1px solid var(--blue-border);
+  color: var(--blue-primary);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.5px;
+}

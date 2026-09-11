@@ -1,0 +1,533 @@
+================================================================================
+           LANGUAGE LEARNING LMS BACKEND - REST API SPECIFICATION
+================================================================================
+Base URL: http://localhost:8080
+Database: PostgreSQL
+Authentication: Bearer JWT Token (RFC 7519)
+Paywall Architecture: Freemium model (First 1-2 lessons free, rest locked behind PRO)
+================================================================================
+
+
+TABLE OF CONTENTS
+-----------------
+1. Authentication & User Management
+   - POST   /api/auth/register          [Public]
+   - POST   /api/auth/login             [Public]
+   - GET    /api/users/me               [Authenticated]
+
+2. Courses & Languages
+   - GET    /api/courses                [Public]
+   - GET    /api/courses/{id}           [Public]
+   - GET    /api/courses/{id}/lessons   [Public / Authenticated]
+
+3. Lessons & Freemium Paywall Gating
+   - GET    /api/lessons/{id}           [Authenticated - Freemium Gated]
+
+4. Progress Tracking
+   - POST   /api/progress/{id}/complete [Authenticated]
+   - GET    /api/progress/courses/{id}  [Authenticated]
+
+5. Payments & Paywall Upgrade
+   - POST   /api/payments/checkout      [Authenticated]
+   - POST   /api/payments/webhook       [Gateway API Key]
+   - GET    /api/payments/history       [Authenticated]
+
+================================================================================
+
+
+1. AUTHENTICATION & USER MANAGEMENT
+------------------------------------
+
+1.1 Register User
+-----------------
+Method:       POST
+Endpoint:     /api/auth/register
+Auth:         None (Public)
+Description:  Creates a new user account with default subscription_status = 'FREE'.
+              Passwords are automatically hashed using BCrypt.
+
+Request Headers:
+  Content-Type: application/json
+
+Request Body:
+{
+  "email": "student@example.com",
+  "password": "SecurePassword123!"
+}
+
+Success Response (201 Created):
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "tokenType": "Bearer",
+  "userId": 1,
+  "email": "student@example.com",
+  "subscriptionStatus": "FREE"
+}
+
+Error Responses:
+- 400 Bad Request:
+  {
+    "timestamp": "2026-09-11T12:00:00",
+    "status": 400,
+    "error": "Bad Request",
+    "message": "Email is already registered: student@example.com",
+    "path": "/api/auth/register"
+  }
+
+cURL:
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"student@example.com","password":"SecurePassword123!"}'
+
+
+1.2 Login User
+--------------
+Method:       POST
+Endpoint:     /api/auth/login
+Auth:         None (Public)
+Description:  Validates user credentials and returns a signed JWT token containing
+              claims for subject, user ID, and current subscription status.
+
+Request Headers:
+  Content-Type: application/json
+
+Request Body:
+{
+  "email": "student@example.com",
+  "password": "SecurePassword123!"
+}
+
+Success Response (200 OK):
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInN1YnNjcmlwdGlvblN0YXR1cyI6IkZSRUUiLCJzdWIiOiJzdHVkZW50QGV4YW1wbGUuY29tIn0...",
+  "tokenType": "Bearer",
+  "userId": 1,
+  "email": "student@example.com",
+  "subscriptionStatus": "FREE"
+}
+
+Error Responses:
+- 401 Unauthorized (Invalid credentials):
+  {
+    "timestamp": "2026-09-11T12:00:00",
+    "status": 401,
+    "error": "Unauthorized",
+    "message": "Invalid email or password",
+    "path": "/api/auth/login"
+  }
+
+cURL:
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"student@example.com","password":"SecurePassword123!"}'
+
+
+1.3 Get Current User Profile (Added / Recommended API)
+------------------------------------------------------
+Method:       GET
+Endpoint:     /api/users/me
+Auth:         Yes (Bearer Token)
+Description:  Returns profile information and subscription status for the currently
+              authenticated user.
+
+Request Headers:
+  Authorization: Bearer <JWT_TOKEN>
+
+Success Response (200 OK):
+{
+  "id": 1,
+  "email": "student@example.com",
+  "subscriptionStatus": "PRO",
+  "createdAt": "2026-09-11T12:00:00"
+}
+
+cURL:
+curl -X GET http://localhost:8080/api/users/me \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+
+
+================================================================================
+
+
+2. COURSES & LESSON CATALOG
+---------------------------
+
+2.1 List All Courses
+--------------------
+Method:       GET
+Endpoint:     /api/courses
+Auth:         None (Public)
+Query Params:
+  - language (optional): Filter courses by language (e.g. ?language=Japanese)
+Description:  Lists available language courses including total lessons and number of
+              free preview lectures.
+
+Success Response (200 OK):
+[
+  {
+    "id": 1,
+    "language": "Japanese",
+    "title": "Japanese N5 Masterclass",
+    "description": "Master basic Hiragana, Katakana, Kanji, and essential grammar for JLPT N5.",
+    "totalLessons": 5,
+    "freeLessonsCount": 2
+  },
+  {
+    "id": 2,
+    "language": "Spanish",
+    "title": "Conversational Spanish A1",
+    "description": "Start speaking Spanish from day one with practical everyday dialogues.",
+    "totalLessons": 5,
+    "freeLessonsCount": 2
+  }
+]
+
+cURL:
+curl -X GET http://localhost:8080/api/courses
+curl -X GET "http://localhost:8080/api/courses?language=Japanese"
+
+
+2.2 Get Course Details by ID (Added / Recommended API)
+------------------------------------------------------
+Method:       GET
+Endpoint:     /api/courses/{id}
+Auth:         None (Public)
+Description:  Returns metadata for a specific course by its primary key ID.
+
+Success Response (200 OK):
+{
+  "id": 1,
+  "language": "Japanese",
+  "title": "Japanese N5 Masterclass",
+  "description": "Master basic Hiragana, Katakana, Kanji, and essential grammar for JLPT N5.",
+  "totalLessons": 5,
+  "freeLessonsCount": 2
+}
+
+cURL:
+curl -X GET http://localhost:8080/api/courses/1
+
+
+2.3 Get Course Lessons (Freemium-Filtered Metadata)
+---------------------------------------------------
+Method:       GET
+Endpoint:     /api/courses/{id}/lessons
+Auth:         Optional / Permitted
+Description:  Returns lesson sequence metadata for the given course.
+              - If user is NOT authenticated or has 'FREE' status:
+                * Free preview lessons (is_free: true) include full video_url (YouTube/Drive).
+                * Paid lessons (is_free: false) have video_url STRIPPED (null) and locked: true.
+              - If user is authenticated with 'PRO' status:
+                * All lessons have locked: false and full video_url included.
+              - If authenticated, also returns 'completed' status per lesson.
+
+Request Headers:
+  Authorization: Bearer <JWT_TOKEN> (Optional - provides PRO unlocks & progress status)
+
+Success Response (200 OK - FREE / Anonymous User):
+[
+  {
+    "id": 1,
+    "courseId": 1,
+    "title": "Introduction to Japanese Writing: Hiragana Fundamentals",
+    "sequenceNo": 1,
+    "free": true,
+    "locked": false,
+    "videoUrl": "https://www.youtube.com/watch?v=6p9Il_j0zjc",
+    "completed": false
+  },
+  {
+    "id": 2,
+    "courseId": 1,
+    "title": "Basic Greetings & Self Introduction (Hajimemashite)",
+    "sequenceNo": 2,
+    "free": true,
+    "locked": false,
+    "videoUrl": "https://www.youtube.com/watch?v=k74yjmfFb_A",
+    "completed": false
+  },
+  {
+    "id": 3,
+    "courseId": 1,
+    "title": "Essential Particles: は (wa), を (o), and が (ga)",
+    "sequenceNo": 3,
+    "free": false,
+    "locked": true,
+    "videoUrl": null,
+    "completed": false
+  }
+]
+
+cURL:
+curl -X GET http://localhost:8080/api/courses/1/lessons \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+
+
+================================================================================
+
+
+3. LESSONS & FREEMIUM PAYWALL GATING
+------------------------------------
+
+3.1 Fetch Specific Lesson (Paywall-Intercepted Video Delivery)
+--------------------------------------------------------------
+Method:       GET
+Endpoint:     /api/lessons/{id}
+Auth:         Yes (Bearer Token)
+Description:  Fetches a specific lesson.
+              INTERCEPTION LOGIC:
+              1. The service layer intercepts the request.
+              2. Queries the 'is_free' flag on the lesson.
+              3. Checks the user's 'subscription_status' from the security context.
+              4. If is_free is false AND subscription_status != 'PRO':
+                 Returns HTTP 403 Forbidden with upgrade prompt.
+              5. If permitted:
+                 Updates or creates user_progress (last_watched_at = now()) and
+                 returns the full DTO with the YouTube or Drive video_url.
+
+Request Headers:
+  Authorization: Bearer <JWT_TOKEN>
+
+Success Response (200 OK - Free Lesson or PRO User):
+{
+  "id": 3,
+  "courseId": 1,
+  "courseTitle": "Japanese N5 Masterclass",
+  "title": "Essential Particles: は (wa), を (o), and が (ga)",
+  "sequenceNo": 3,
+  "free": false,
+  "videoUrl": "https://drive.google.com/file/d/1JapaneseGrammarParticlesSample/view",
+  "completed": false,
+  "lastWatchedAt": "2026-09-11T12:15:30"
+}
+
+Paywall Blocked Response (403 Forbidden - FREE User on Paid Lesson):
+{
+  "timestamp": "2026-09-11T12:15:30",
+  "status": 403,
+  "error": "Subscription Required",
+  "message": "Subscription required to access this lesson. Please upgrade to PRO to unlock full course access.",
+  "path": "/api/lessons/3"
+}
+
+cURL:
+curl -X GET http://localhost:8080/api/lessons/1 \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+
+
+================================================================================
+
+
+4. PROGRESS TRACKING
+--------------------
+
+4.1 Mark Lesson as Complete
+---------------------------
+Method:       POST
+Endpoint:     /api/progress/{id}/complete
+Auth:         Yes (Bearer Token)
+Description:  Marks lesson with {id} as completed for the authenticated user.
+              Inserts or updates the user_progress record and updates last_watched_at.
+
+Request Headers:
+  Authorization: Bearer <JWT_TOKEN>
+
+Success Response (200 OK):
+{
+  "lessonId": 1,
+  "completed": true,
+  "lastWatchedAt": "2026-09-11T12:20:00"
+}
+
+cURL:
+curl -X POST http://localhost:8080/api/progress/1/complete \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+
+
+4.2 Get Course Progress (Added / Recommended API)
+-------------------------------------------------
+Method:       GET
+Endpoint:     /api/progress/courses/{courseId}
+Auth:         Yes (Bearer Token)
+Description:  Calculates the user's progress percentage across all lessons in the course
+              and returns the list of completed lesson IDs.
+
+Request Headers:
+  Authorization: Bearer <JWT_TOKEN>
+
+Success Response (200 OK):
+{
+  "courseId": 1,
+  "totalLessons": 5,
+  "completedLessons": 2,
+  "completionPercentage": 40.0,
+  "completedLessonIds": [1, 2]
+}
+
+cURL:
+curl -X GET http://localhost:8080/api/progress/courses/1 \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+
+
+================================================================================
+
+
+5. PAYMENTS & PRO SUBSCRIPTION UPGRADE
+--------------------------------------
+
+5.1 Initiate Paywall Checkout
+-----------------------------
+Method:       POST
+Endpoint:     /api/payments/checkout
+Auth:         Yes (Bearer Token)
+Description:  Initiates the paywall checkout transaction for the authenticated user.
+              Generates a unique transaction_id, inserts a record with status 'PENDING',
+              and returns the transaction details.
+
+Request Headers:
+  Authorization: Bearer <JWT_TOKEN>
+  Content-Type:  application/json
+
+Request Body (Optional / defaults to PRO_MONTHLY $19.99):
+{
+  "plan": "PRO_MONTHLY",
+  "amount": 19.99
+}
+
+Success Response (201 Created):
+{
+  "transactionId": "txn_8803ba97b8304918a5",
+  "amount": 19.99,
+  "status": "PENDING",
+  "message": "Paywall checkout initiated. Complete payment and trigger webhook to unlock PRO features.",
+  "webhookSimulatorUrl": "/api/payments/webhook"
+}
+
+cURL:
+curl -X POST http://localhost:8080/api/payments/checkout \
+  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"plan":"PRO_MONTHLY","amount":19.99}'
+
+
+5.2 Payment Gateway Webhook Listener
+------------------------------------
+Method:       POST
+Endpoint:     /api/payments/webhook
+Auth:         Gateway API Key Header: X-Webhook-Secret
+Description:  Listens for payment gateway webhook events (e.g. Stripe, Razorpay, LemonSqueezy).
+              Validates the X-Webhook-Secret header.
+              Upon 'SUCCESS' or 'COMPLETED' event:
+              - Updates payment status to 'SUCCESS'.
+              - Upgrades the associated user's subscription_status to 'PRO'.
+              Immediately unlocks all paid lessons across all language courses for that user.
+
+Request Headers:
+  X-Webhook-Secret: sec_test_webhook_key_12345
+  Content-Type:     application/json
+
+Request Body:
+{
+  "transaction_id": "txn_8803ba97b8304918a5",
+  "status": "SUCCESS",
+  "amount": 19.99
+}
+
+Success Response (200 OK):
+{
+  "id": 1,
+  "transactionId": "txn_8803ba97b8304918a5",
+  "amount": 19.99,
+  "status": "SUCCESS",
+  "createdAt": "2026-09-11T12:25:00"
+}
+
+Unauthorized Response (401 Unauthorized - Missing or Wrong Secret):
+{
+  "timestamp": "2026-09-11T12:25:00",
+  "status": 401,
+  "error": "Unauthorized",
+  "message": "Unauthorized: Invalid webhook secret key",
+  "path": "/api/payments/webhook"
+}
+
+cURL:
+curl -X POST http://localhost:8080/api/payments/webhook \
+  -H "X-Webhook-Secret: sec_test_webhook_key_12345" \
+  -H "Content-Type: application/json" \
+  -d '{"transaction_id":"txn_8803ba97b8304918a5","status":"SUCCESS","amount":19.99}'
+
+
+5.3 Get Payment History (Added / Recommended API)
+-------------------------------------------------
+Method:       GET
+Endpoint:     /api/payments/history
+Auth:         Yes (Bearer Token)
+Description:  Retrieves all historical payments, transaction IDs, and statuses for
+              the logged-in user.
+
+Request Headers:
+  Authorization: Bearer <JWT_TOKEN>
+
+Success Response (200 OK):
+[
+  {
+    "id": 1,
+    "transactionId": "txn_8803ba97b8304918a5",
+    "amount": 19.99,
+    "status": "SUCCESS",
+    "createdAt": "2026-09-11T12:25:00"
+  }
+]
+
+cURL:
+curl -X GET http://localhost:8080/api/payments/history \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+
+
+================================================================================
+END TO END TESTING QUICKSTART FLOW
+================================================================================
+Step 1: Register User:
+  curl -s -X POST http://localhost:8080/api/auth/register \
+    -H "Content-Type: application/json" \
+    -d '{"email":"learner@japan.com","password":"Password123!"}'
+
+Step 2: Login & Export Token:
+  TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{"email":"learner@japan.com","password":"Password123!"}' | jq -r .token)
+
+Step 3: Browse Courses:
+  curl -s -X GET http://localhost:8080/api/courses
+
+Step 4: Check Course Lessons (Notice paid lessons are locked):
+  curl -s -X GET http://localhost:8080/api/courses/1/lessons -H "Authorization: Bearer $TOKEN"
+
+Step 5: Watch Free Lesson:
+  curl -s -X GET http://localhost:8080/api/lessons/1 -H "Authorization: Bearer $TOKEN"
+
+Step 6: Try Paid Lesson (Will return 403 Forbidden):
+  curl -s -X GET http://localhost:8080/api/lessons/3 -H "Authorization: Bearer $TOKEN"
+
+Step 7: Initiate Checkout:
+  TXN_ID=$(curl -s -X POST http://localhost:8080/api/payments/checkout \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{"plan":"PRO_MONTHLY"}' | jq -r .transactionId)
+
+Step 8: Simulate Gateway Webhook Approval:
+  curl -s -X POST http://localhost:8080/api/payments/webhook \
+    -H "X-Webhook-Secret: sec_test_webhook_key_12345" \
+    -H "Content-Type: application/json" \
+    -d "{\"transaction_id\":\"$TXN_ID\",\"status\":\"SUCCESS\"}"
+
+Step 9: Access Paid Lesson Again (Now returns 200 OK with Video URL!):
+  curl -s -X GET http://localhost:8080/api/lessons/3 -H "Authorization: Bearer $TOKEN"
+
+Step 10: Mark Lesson Completed:
+  curl -s -X POST http://localhost:8080/api/progress/3/complete -H "Authorization: Bearer $TOKEN"
+
+Step 11: View Course Progress:
+  curl -s -X GET http://localhost:8080/api/progress/courses/1 -H "Authorization: Bearer $TOKEN"
+================================================================================
