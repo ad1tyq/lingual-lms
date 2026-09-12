@@ -161,9 +161,9 @@ const styles: Record<string, React.CSSProperties> = {
   sequenceBadge: {
     fontSize: '12px',
     fontWeight: '700',
-    color: 'var(--blue-primary)',
-    backgroundColor: 'var(--blue-light)',
-    border: '1px solid var(--blue-border)',
+    color: 'var(--orenji-primary)',
+    backgroundColor: 'var(--orenji-light)',
+    border: '1px solid var(--orenji-border)',
     padding: '3px 8px',
     borderRadius: '6px',
   },

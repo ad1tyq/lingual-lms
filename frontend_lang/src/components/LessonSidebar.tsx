@@ -52,7 +52,7 @@ export const LessonSidebar: React.FC<LessonSidebarProps> = ({
                   ) : isLocked ? (
                     <Lock size={15} color="var(--orenji-primary)" />
                   ) : isActive ? (
-                    <Play size={15} color="var(--blue-primary)" fill="var(--blue-primary)" />
+                    <Play size={15} color="var(--orenji-primary)" fill="var(--orenji-primary)" />
                   ) : (
                     <Circle size={15} color="var(--text-muted)" />
                   )}
@@ -68,7 +68,7 @@ export const LessonSidebar: React.FC<LessonSidebarProps> = ({
                 ) : isLocked ? (
                   <span className="badge-pro" style={{ fontSize: '10px' }}>PRO</span>
                 ) : (
-                  <span className="badge-blue" style={{ fontSize: '10px' }}>Unlocked</span>
+                  <span className="badge-orenji" style={{ fontSize: '10px' }}>Unlocked</span>
                 )}
               </div>
             </button>
@@ -123,9 +123,9 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   itemActive: {
-    backgroundColor: 'var(--blue-light)',
-    borderColor: 'var(--blue-border)',
-    boxShadow: '0 1px 4px var(--blue-glow)',
+    backgroundColor: 'var(--orenji-light)',
+    borderColor: 'var(--orenji-border)',
+    boxShadow: '0 1px 4px var(--orenji-glow)',
   },
   itemLocked: {
     opacity: 0.9,
@@ -156,7 +156,7 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: 'nowrap',
   },
   itemTitleActive: {
-    color: 'var(--blue-primary)',
+    color: 'var(--orenji-primary)',
     fontWeight: '700',
   },
 };

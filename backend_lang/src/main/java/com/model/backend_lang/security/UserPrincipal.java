@@ -2,8 +2,6 @@ package com.model.backend_lang.security;
 
 import com.model.backend_lang.model.SubscriptionStatus;
 import com.model.backend_lang.model.User;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,8 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@AllArgsConstructor
-@Getter
 public class UserPrincipal implements UserDetails {
 
     private final Long id;
@@ -21,6 +17,22 @@ public class UserPrincipal implements UserDetails {
     private final String password;
     private final SubscriptionStatus subscriptionStatus;
     private final Collection<? extends GrantedAuthority> authorities;
+
+    public UserPrincipal(
+            Long id,
+            String email,
+            String actualUsername,
+            String password,
+            SubscriptionStatus subscriptionStatus,
+            Collection<? extends GrantedAuthority> authorities
+    ) {
+        this.id = id;
+        this.email = email;
+        this.actualUsername = actualUsername;
+        this.password = password;
+        this.subscriptionStatus = subscriptionStatus;
+        this.authorities = authorities;
+    }
 
     public static UserPrincipal create(User user) {
         String role = (user.getRole() != null && !user.getRole().trim().isEmpty()) ? user.getRole() : "USER";
@@ -36,6 +48,22 @@ public class UserPrincipal implements UserDetails {
                 user.getSubscriptionStatus(),
                 authorities
         );
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getActualUsername() {
+        return actualUsername;
+    }
+
+    public SubscriptionStatus getSubscriptionStatus() {
+        return subscriptionStatus;
     }
 
     @Override
@@ -73,3 +101,4 @@ public class UserPrincipal implements UserDetails {
         return true;
     }
 }
+
