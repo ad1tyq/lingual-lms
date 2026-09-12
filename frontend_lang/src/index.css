@@ -3,7 +3,7 @@
 :root {
   --font-family: 'Plus Jakarta Sans', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   
-  /* Japanese Minimalist Palette: Shiro (White) + Aoi (Indigo Blue) + Orenji (Orange) */
+  /* Japanese Minimalist Palette: Shiro (White) + Orenji (Orange オレンジ) */
   --bg-app: #F8FAFC;
   --bg-card: #FFFFFF;
   --bg-card-hover: #F1F5F9;
@@ -11,38 +11,39 @@
   --bg-subtle: #F8FAFC;
   
   --border-subtle: #E2E8F0;
-  --border-focus: #3B82F6;
+  --border-focus: #EA580C;
   --border-orenji: rgba(249, 115, 22, 0.4);
 
   --text-primary: #0F172A;
   --text-secondary: #475569;
   --text-muted: #64748B;
 
-  /* Blue / Indigo (Aoi 藍・青) - Lighter, modern Japanese blue */
-  --blue-primary: #3B82F6;
-  --blue-hover: #2563EB;
-  --blue-light: #EFF6FF;
-  --blue-border: #BFDBFE;
-  --blue-glow: rgba(59, 130, 246, 0.22);
-
-  /* Orenji (Orange オレンジ) */
+  /* Orenji (Orange オレンジ) - Main Vibrant Aesthetic */
   --orenji-primary: #EA580C;
+  --orenji-hover: #C2410C;
   --orenji-vibrant: #F97316;
   --orenji-light: #FFF7ED;
-  --orenji-border: #FFEDD5;
-  --orenji-glow: rgba(234, 88, 12, 0.2);
+  --orenji-border: #FED7AA;
+  --orenji-glow: rgba(234, 88, 12, 0.24);
   --orenji-gradient: linear-gradient(135deg, #EA580C 0%, #F97316 100%);
+
+  /* Legacy blue variables aliased to Orenji for seamless theme transition */
+  --blue-primary: #EA580C;
+  --blue-hover: #C2410C;
+  --blue-light: #FFF7ED;
+  --blue-border: #FED7AA;
+  --blue-glow: rgba(234, 88, 12, 0.24);
 
   /* Shiro (White 白) */
   --shiro: #FFFFFF;
 
-  /* Aliases for Orenji / Warm Gold compatibility */
+  /* Primary Brand Tokens (Orenji) */
   --gold: #EA580C;
-  --border-gold: #FFEDD5;
+  --border-gold: #FED7AA;
   --shadow-gold: var(--shadow-orenji);
-  --primary: var(--blue-primary);
-  --primary-glow: var(--blue-glow);
-  --primary-gradient: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
+  --primary: var(--orenji-primary);
+  --primary-glow: var(--orenji-glow);
+  --primary-gradient: var(--orenji-gradient);
 
   /* Status Colors */
   --emerald: #059669;
@@ -136,17 +137,17 @@ input, select, textarea {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background-color: var(--blue-primary);
+  background: var(--orenji-gradient);
   color: #fff;
-  font-weight: 600;
+  font-weight: 700;
   padding: 10px 20px;
   border-radius: var(--radius-md);
-  box-shadow: 0 2px 8px var(--blue-glow);
+  box-shadow: var(--shadow-orenji);
 }
 .btn-primary:hover {
-  background-color: var(--blue-hover);
+  filter: brightness(1.08);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px var(--blue-glow);
+  box-shadow: 0 6px 20px rgba(234, 88, 12, 0.35);
 }
 
 .btn-orenji,
@@ -233,13 +234,14 @@ input, select, textarea {
   letter-spacing: 0.5px;
 }
 
-.badge-blue {
+.badge-blue,
+.badge-orenji {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background-color: var(--blue-light);
-  border: 1px solid var(--blue-border);
-  color: var(--blue-primary);
+  background-color: var(--orenji-light);
+  border: 1px solid var(--orenji-border);
+  color: var(--orenji-primary);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -252,6 +254,7 @@ input, select, textarea {
 .badge-free,
 .badge-pro,
 .badge-blue,
+.badge-orenji,
 .course-detail-lang-tag,
 .catalog-kanji-badge {
   white-space: nowrap !important;
@@ -290,7 +293,7 @@ input, select, textarea {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  color: var(--blue-primary);
+  color: var(--orenji-primary);
   line-height: 1.2;
 }
 
@@ -422,7 +425,7 @@ input, select, textarea {
     font-size: 15px !important;
     border-radius: 12px !important;
     font-weight: 700 !important;
-    box-shadow: 0 3px 12px rgba(59, 130, 246, 0.25) !important;
+    box-shadow: 0 3px 12px rgba(234, 88, 12, 0.25) !important;
   }
 
   .course-detail-actions .btn-orenji {

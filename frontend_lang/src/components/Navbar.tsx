@@ -161,8 +161,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   kanjiTag: {
     fontSize: '11px',
-    backgroundColor: 'var(--blue-light)',
-    color: 'var(--blue-primary)',
+    backgroundColor: 'var(--orenji-light)',
+    color: 'var(--orenji-primary)',
     padding: '2px 6px',
     borderRadius: '4px',
     fontWeight: '700',
@@ -192,8 +192,8 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'all 0.2s',
   },
   navLinkActive: {
-    color: 'var(--blue-primary)',
-    backgroundColor: 'var(--blue-light)',
+    color: 'var(--orenji-primary)',
+    backgroundColor: 'var(--orenji-light)',
   },
   actions: {
     display: 'flex',

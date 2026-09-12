@@ -444,7 +444,7 @@ export const AdminPage: React.FC = () => {
             <div style={styles.kpiCard}>
               <div style={styles.kpiHeader}>
                 <span style={styles.kpiLabel}>Total Registered Students</span>
-                <div style={{ ...styles.kpiIconSquare, backgroundColor: '#EFF6FF', color: 'var(--blue-primary)' }}>
+                <div style={{ ...styles.kpiIconSquare, backgroundColor: 'var(--orenji-light)', color: 'var(--orenji-primary)' }}>
                   <Users size={18} />
                 </div>
               </div>
@@ -560,8 +560,8 @@ export const AdminPage: React.FC = () => {
                 <svg viewBox="0 0 700 240" style={styles.svgChart}>
                   <defs>
                     <linearGradient id="trafficGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.35" />
-                      <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.0" />
+                      <stop offset="0%" stopColor="#EA580C" stopOpacity="0.35" />
+                      <stop offset="100%" stopColor="#EA580C" stopOpacity="0.0" />
                     </linearGradient>
                   </defs>
 
@@ -589,10 +589,10 @@ export const AdminPage: React.FC = () => {
                     return (
                       <>
                         <path d={areaD} fill="url(#trafficGradient)" />
-                        <path d={pathD} fill="none" stroke="var(--blue-primary)" strokeWidth="3" strokeLinecap="round" />
+                        <path d={pathD} fill="none" stroke="var(--orenji-primary)" strokeWidth="3" strokeLinecap="round" />
                         {points.map((pt, i) => (
                           <g key={i}>
-                            <circle cx={pt.x} cy={pt.y} r="5" fill="#FFFFFF" stroke="var(--blue-primary)" strokeWidth="3" />
+                            <circle cx={pt.x} cy={pt.y} r="5" fill="#FFFFFF" stroke="var(--orenji-primary)" strokeWidth="3" />
                             <text x={pt.x} y="222" textAnchor="middle" fill="var(--text-secondary)" fontSize="11" fontWeight="600">
                               {pt.p.day}
                             </text>
@@ -655,7 +655,7 @@ export const AdminPage: React.FC = () => {
                         style={{
                           ...styles.progressBarFill,
                           width: `${cat.percentage}%`,
-                          backgroundColor: cat.percentage > 30 ? 'var(--orenji-primary)' : 'var(--blue-primary)',
+                          backgroundColor: cat.percentage > 30 ? 'var(--orenji-primary)' : 'var(--orenji-vibrant)',
                         }}
                       />
                     </div>
@@ -933,7 +933,7 @@ export const AdminPage: React.FC = () => {
             {/* Form 2: Add Lecture to Category */}
             <div style={styles.card}>
               <div style={styles.cardHeader}>
-                <div style={styles.iconSquare}><Video size={18} color="var(--blue-primary)" /></div>
+                <div style={styles.iconSquare}><Video size={18} color="var(--orenji-primary)" /></div>
                 <div>
                   <h2 style={styles.cardTitle}>2. Add Lecture Video</h2>
                   <p style={styles.cardSub}>YouTube or Google Drive stream link</p>
@@ -1386,7 +1386,7 @@ const styles: Record<string, React.CSSProperties> = {
   kpiHighlight: {
     fontSize: '12px',
     fontWeight: 700,
-    color: 'var(--blue-primary)',
+    color: 'var(--orenji-primary)',
   },
   kpiSub: {
     fontSize: '12px',
@@ -1446,7 +1446,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   toggleBtnActive: {
     backgroundColor: 'var(--shiro)',
-    color: 'var(--blue-primary)',
+    color: 'var(--orenji-primary)',
     boxShadow: 'var(--shadow-sm)',
   },
   svgChart: {

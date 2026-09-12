@@ -156,7 +156,7 @@ export const CourseDetail: React.FC = () => {
                   <h3 className="course-detail-lesson-title" style={styles.lessonTitle}>{lesson.title}</h3>
                   <div className="course-detail-lesson-meta" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: 4 }}>
                     <span style={styles.lessonFormat}>
-                      <Video size={12} style={{ marginRight: 4, verticalAlign: 'middle', color: 'var(--blue-primary)' }} />
+                      <Video size={12} style={{ marginRight: 4, verticalAlign: 'middle', color: 'var(--orenji-primary)' }} />
                       Video Lecture
                     </span>
                     {lesson.completed ? (
@@ -170,7 +170,7 @@ export const CourseDetail: React.FC = () => {
                         <Lock size={10} /> PRO Only
                       </span>
                     ) : (
-                      <span className="badge-blue" style={{ fontSize: '10px', padding: '2px 7px' }}>
+                      <span className="badge-orenji" style={{ fontSize: '10px', padding: '2px 7px' }}>
                         Unlocked
                       </span>
                     )}
@@ -180,7 +180,7 @@ export const CourseDetail: React.FC = () => {
 
               <div className="course-detail-lesson-right" style={{ flexShrink: 0 }}>
                 <button className="course-detail-play-btn" style={styles.playBtn} title={lesson.locked ? 'Unlock Lecture' : 'Watch Lecture'}>
-                  {!user || lesson.locked ? <Lock size={16} color="var(--orenji-primary)" /> : <Play size={16} color="var(--blue-primary)" />}
+                  {!user || lesson.locked ? <Lock size={16} color="var(--orenji-primary)" /> : <Play size={16} color="var(--orenji-primary)" />}
                 </button>
               </div>
             </div>
@@ -235,9 +235,9 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
-    color: 'var(--blue-primary)',
-    backgroundColor: 'var(--blue-light)',
-    border: '1px solid var(--blue-border)',
+    color: 'var(--orenji-primary)',
+    backgroundColor: 'var(--orenji-light)',
+    border: '1px solid var(--orenji-border)',
     padding: '4px 10px',
     borderRadius: 'var(--radius-full)',
     whiteSpace: 'nowrap',

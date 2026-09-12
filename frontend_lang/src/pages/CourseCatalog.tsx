@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getCourses } from '../api/courses';
 import type { Course } from '../types/course';
-import { Sparkles, ArrowRight, Layers, Utensils, Compass, BookOpen, Film, Flame } from 'lucide-react';
+import { ArrowRight, Layers, Utensils, Compass, BookOpen, Film, Flame } from 'lucide-react';
 import { CatLogo } from '../components/CatLogo';
 
 export const CourseCatalog: React.FC = () => {
@@ -61,13 +61,8 @@ export const CourseCatalog: React.FC = () => {
       {/* Hero Banner with Big Cat Logo */}
       <section className="catalog-hero" style={styles.hero}>
         {/* BIG CAT LOGO (Maneki-Neko) */}
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginBottom: '24px' }}>
           <CatLogo size={145} />
-        </div>
-
-        <div style={styles.heroBadge}>
-          <Sparkles size={14} color="var(--orenji-primary)" />
-          <span>招き猫の日本文化アカデミー • Maneki-Neko Academy</span>
         </div>
 
         <h1 className="catalog-hero-title" style={styles.heroTitle}>
@@ -173,20 +168,6 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: '820px',
     margin: '0 auto 50px',
   },
-  heroBadge: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '8px',
-    backgroundColor: 'var(--orenji-light)',
-    border: '1px solid var(--orenji-border)',
-    color: 'var(--orenji-primary)',
-    padding: '6px 18px',
-    borderRadius: 'var(--radius-full)',
-    fontSize: '13px',
-    fontWeight: '700',
-    marginBottom: '20px',
-    letterSpacing: '0.4px',
-  },
   heroTitle: {
     fontSize: '44px',
     fontWeight: '800',
@@ -230,10 +211,10 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: 'var(--shadow-sm)',
   },
   filterBtnActive: {
-    backgroundColor: 'var(--blue-primary)',
+    backgroundColor: 'var(--orenji-primary)',
     color: '#fff',
-    borderColor: 'var(--blue-primary)',
-    boxShadow: '0 2px 10px var(--blue-glow)',
+    borderColor: 'var(--orenji-primary)',
+    boxShadow: '0 2px 10px var(--orenji-glow)',
   },
   grid: {
     display: 'grid',
@@ -279,7 +260,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: '0.6px',
-    color: 'var(--blue-primary)',
+    color: 'var(--orenji-primary)',
     lineHeight: 1.2,
   },
   courseTitle: {
