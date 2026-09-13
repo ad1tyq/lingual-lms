@@ -306,11 +306,55 @@ input, select, textarea {
 /* ===================================================
    Mobile View Optimizations (Navbar & Course Details)
    =================================================== */
-@media (max-width: 640px) {
-  /* Navbar Mobile Layout */
+/* Responsive Desktop vs Mobile Navigation */
+@media (min-width: 961px) {
   .navbar-container {
-    padding: 0 14px !important;
-    height: 60px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 24px !important;
+    height: 70px !important;
+  }
+
+  .navbar-mobile-controls {
+    display: none !important;
+  }
+
+  .navbar-left-section {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    min-width: 0 !important;
+  }
+
+  .navbar-desktop-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 960px) {
+  .navbar-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 16px !important;
+    height: 64px !important;
+  }
+
+  .navbar-desktop-nav,
+  .navbar-center-languages,
+  .navbar-desktop-actions {
+    display: none !important;
+  }
+
+  .navbar-mobile-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
   }
 
   .navbar-brand {
@@ -320,8 +364,8 @@ input, select, textarea {
   }
 
   .navbar-logo-icon {
-    width: 32px !important;
-    height: 32px !important;
+    width: 34px !important;
+    height: 34px !important;
     border-radius: 8px !important;
     flex-shrink: 0 !important;
   }
@@ -332,38 +376,21 @@ input, select, textarea {
     white-space: nowrap !important;
   }
 
-  /* Hide long brand subtitle and kanji tag on small mobile viewports */
+  /* Hide long brand subtitle on small mobile viewports */
   .navbar-logo-sub {
     display: none !important;
   }
 
+  /* Preserve language side badge on mobile */
   .navbar-kanji-tag {
-    display: none !important;
+    display: inline-block !important;
+    font-size: 10px !important;
+    padding: 1px 6px !important;
+    border-radius: 4px !important;
   }
+}
 
-  .navbar-auth-group {
-    display: flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-    flex-shrink: 0 !important;
-  }
-
-  .navbar-auth-btn {
-    padding: 7px 11px !important;
-    font-size: 12px !important;
-    white-space: nowrap !important;
-    letter-spacing: -0.2px !important;
-    border-radius: 8px !important;
-  }
-
-  .navbar-user-email {
-    max-width: 90px !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    font-size: 12px !important;
-  }
-
+@media (max-width: 640px) {
   /* Course Details Page Mobile Layout */
   .course-detail-container {
     padding: 16px 14px 60px !important;
@@ -511,3 +538,82 @@ input, select, textarea {
     font-size: 12px !important;
   }
 }
+
+/* Footer Social Links & Link Hover */
+.social-hover:hover {
+  color: var(--orenji-primary) !important;
+  border-color: var(--orenji-border) !important;
+  background-color: var(--orenji-light) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.15);
+}
+
+/* Page Transition & Fluid Entry Animations */
+@keyframes pageTransitionEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.995);
+    filter: blur(2px);
+  }
+  50% {
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+.page-transition-enter {
+  animation: pageTransitionEnter 0.36s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform, filter;
+  width: 100%;
+}
+
+/* Reusable Back Navigation Button */
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  text-decoration: none;
+  user-select: none;
+  margin-bottom: 18px;
+}
+
+.btn-back:hover {
+  color: var(--orenji-primary);
+  border-color: var(--orenji-border);
+  background-color: var(--orenji-light);
+  transform: translateX(-3px);
+  box-shadow: 0 3px 12px rgba(234, 88, 12, 0.12);
+}
+
+.btn-back:active {
+  transform: translateX(-1px) scale(0.97);
+}
+
+/* Interactive engaging micro-interactions */
+button:active {
+  transform: scale(0.98);
+}
+
+.card-hover-lift {
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.26s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-4px) scale(1.008) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.09), 0 4px 12px rgba(234, 88, 12, 0.08) !important;
+}
+

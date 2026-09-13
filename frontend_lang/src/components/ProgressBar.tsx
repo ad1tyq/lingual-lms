@@ -60,7 +60,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   fill: {
     height: '100%',
-    background: 'linear-gradient(90deg, #6366F1 0%, #10B981 100%)',
+    background: 'linear-gradient(90deg, var(--orenji-primary) 0%, #10B981 100%)',
     borderRadius: 'var(--radius-full)',
     transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
   },

@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useModal } from '../context/ModalContext';
 import { getPaymentHistory } from '../api/payments';
 import type { PaymentRecord } from '../types/payment';
-import { Crown, Sparkles, Receipt, ShieldCheck, Clock, CheckCircle } from 'lucide-react';
+import { Crown, Sparkles, Receipt, ShieldCheck, Clock, CheckCircle, ArrowLeft } from 'lucide-react';
 
 export const AccountPage: React.FC = () => {
   const { user } = useAuth();
   const { openPaywall } = useModal();
+  const navigate = useNavigate();
   const [history, setHistory] = useState<PaymentRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,6 +34,17 @@ export const AccountPage: React.FC = () => {
 
   return (
     <div style={styles.container}>
+      <button
+        type="button"
+        onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+        className="btn-back"
+        style={{ marginBottom: '20px' }}
+        title="Go back"
+      >
+        <ArrowLeft size={16} />
+        <span>Back</span>
+      </button>
+
       <div style={styles.header}>
         <h1 style={styles.title}>Account & Subscription</h1>
         <p style={styles.subtitle}>Manage your learning membership, tier status, and billing transactions.</p>

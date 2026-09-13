@@ -2,10 +2,16 @@ import { request } from './client';
 import type { Course, CreateCourseData, CreateLessonData } from '../types/course';
 import type { LessonSummary, LessonDetail } from '../types/lesson';
 
-export async function getCourses(category?: string): Promise<Course[]> {
+export async function getCourses(category?: string, targetLanguage?: string): Promise<Course[]> {
   return request<Course[]>('/api/courses', {
     method: 'GET',
-    params: { category },
+    params: { category, targetLanguage },
+  });
+}
+
+export async function getAvailableLanguages(): Promise<string[]> {
+  return request<string[]>('/api/courses/languages', {
+    method: 'GET',
   });
 }
 

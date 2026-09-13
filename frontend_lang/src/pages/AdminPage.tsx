@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getCourses, createCourse, updateCourse, deleteCourse, getCourseLessons, addLessonToCourse, deleteLesson } from '../api/courses';
 import { getAdminStats, getAdminUsers, updateUserSubscription } from '../api/admin';
 import type { Course, CreateCourseData, CreateLessonData } from '../types/course';
@@ -8,15 +9,30 @@ import {
   Shield, Plus, Trash2, Video, CheckCircle2, Lock, ChevronDown, ChevronUp,
   AlertCircle, Layers, Key, LogOut, Loader2, Sparkles, User as UserIcon,
   Edit3, X, BarChart3, Users, BookOpen, TrendingUp, Eye, PlayCircle,
-  Activity, Search, RefreshCw, ArrowUpRight
+  Activity, Search, RefreshCw, ArrowUpRight, ArrowLeft
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 type AdminTab = 'analytics' | 'users' | 'courses';
 
+const QUICK_TAGS_BY_LANG: Record<string, string[]> = {
+  Japanese: ['語学', '和食', '旅行', 'ポップ', '伝統', 'アニメ', '日常', '祭り'],
+  Korean: ['한글', '한식', '여행', '한류', '전통', '케이팝', '회화', '문화'],
+  Spanish: ['Idioma', 'Tapas', 'Viaje', 'Fiesta', 'Arte', 'Cocina', 'Música', 'Cultura'],
+  French: ['Langue', 'Cuisine', 'Voyage', 'Culture', 'Vin', 'Cinéma', 'Mode', 'Art'],
+};
+
+const LANGUAGES_SUPPORTED = [
+  { id: 'Japanese', name: 'Japanese', flag: '🇯🇵', native: '日本語' },
+  { id: 'Korean', name: 'Korean', flag: '🇰🇷', native: '한국어' },
+  { id: 'Spanish', name: 'Spanish', flag: '🇪🇸', native: 'Español' },
+  { id: 'French', name: 'French', flag: '🇫🇷', native: 'Français' },
+];
+
 export const AdminPage: React.FC = () => {
   const { user, login, logout } = useAuth();
-  const isAdmin = user && (user.role === 'ADMIN' || user.email === 'admin@japan.com' || user.username === 'admin');
+  const navigate = useNavigate();
+  const isAdmin = user?.role === 'ADMIN' || user?.email === 'admin@nyantaro.com' || user?.email === 'admin@japan.com' || user?.username === 'admin';
 
   // Authentication Gate State
   const [adminIdentifier, setAdminIdentifier] = useState('');
@@ -45,9 +61,14 @@ export const AdminPage: React.FC = () => {
   const [userSearch, setUserSearch] = useState('');
   const [userTierFilter, setUserTierFilter] = useState<'ALL' | 'PRO' | 'FREE' | 'ADMIN'>('ALL');
 
+  // Language Scope State (Overall Platform or Specific Culture)
+  const [selectedLanguageFilter, setSelectedLanguageFilter] = useState<string>('ALL');
+  const [courseFilterLanguage, setCourseFilterLanguage] = useState<string>('ALL');
+
   // Edit Category Modal State
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [editFormData, setEditFormData] = useState<CreateCourseData>({
+    targetLanguage: 'Japanese',
     category: '',
     title: '',
     description: '',
@@ -57,6 +78,7 @@ export const AdminPage: React.FC = () => {
 
   // New Category & Lesson Form States
   const [newCategory, setNewCategory] = useState<CreateCourseData>({
+    targetLanguage: 'Japanese',
     category: '',
     title: '',
     description: '',
@@ -78,12 +100,13 @@ export const AdminPage: React.FC = () => {
     }
   }, [isAdmin]);
 
-  const loadAllDashboardData = async () => {
+  const loadAllDashboardData = async (languageScope?: string) => {
     setLoadingData(true);
+    const scope = languageScope !== undefined ? languageScope : selectedLanguageFilter;
     try {
       const [coursesData, statsData, usersData] = await Promise.all([
         getCourses().catch(() => []),
-        getAdminStats().catch(() => null),
+        getAdminStats(scope !== 'ALL' ? scope : undefined).catch(() => null),
         getAdminUsers().catch(() => []),
       ]);
       setCourses(coursesData);
@@ -97,6 +120,15 @@ export const AdminPage: React.FC = () => {
     } finally {
       setLoadingData(false);
     }
+  };
+
+  const handleLanguageFilterChange = async (scope: string) => {
+    setSelectedLanguageFilter(scope);
+    if (scope !== 'ALL') {
+      setCourseFilterLanguage(scope);
+      setNewCategory((prev) => ({ ...prev, targetLanguage: scope }));
+    }
+    await loadAllDashboardData(scope);
   };
 
   const handleAdminLogin = async (e: React.FormEvent) => {
@@ -131,9 +163,19 @@ export const AdminPage: React.FC = () => {
     setLoading(true);
     setMessage(null);
     try {
-      await createCourse(newCategory);
-      setMessage({ text: `Category "${newCategory.title}" created successfully!`, type: 'success' });
-      setNewCategory({ category: '', title: '', description: '', japaneseTag: '' });
+      const payload: CreateCourseData = {
+        ...newCategory,
+        targetLanguage: newCategory.targetLanguage || (selectedLanguageFilter !== 'ALL' ? selectedLanguageFilter : 'Japanese'),
+      };
+      await createCourse(payload);
+      setMessage({ text: `[${payload.targetLanguage}] Category "${payload.title}" created successfully!`, type: 'success' });
+      setNewCategory({
+        targetLanguage: payload.targetLanguage,
+        category: '',
+        title: '',
+        description: '',
+        japaneseTag: '',
+      });
       await loadAllDashboardData();
     } catch (err: any) {
       setMessage({ text: err.message || 'Failed to create category', type: 'error' });
@@ -145,6 +187,7 @@ export const AdminPage: React.FC = () => {
   const openEditCategory = (course: Course) => {
     setEditingCourse(course);
     setEditFormData({
+      targetLanguage: course.targetLanguage || 'Japanese',
       category: course.language || course.category || '',
       title: course.title,
       description: course.description || '',
@@ -165,7 +208,7 @@ export const AdminPage: React.FC = () => {
       const updated = await updateCourse(editingCourse.id, editFormData);
       setCourses((prev) => prev.map((c) => (c.id === editingCourse.id ? { ...c, ...updated } : c)));
       setMessage({
-        text: `Category "${updated.title}" updated successfully with Japanese tag [${updated.japaneseTag || 'none'}]!`,
+        text: `[${updated.targetLanguage || 'Course'}] Category "${updated.title}" updated successfully!`,
         type: 'success',
       });
       setEditingCourse(null);
@@ -274,10 +317,30 @@ export const AdminPage: React.FC = () => {
     return Math.max(...trafficPoints.map((p) => p[trafficMetric])) * 1.25;
   }, [trafficPoints, trafficMetric]);
 
+  // Filtered Courses by Target Language in Course Studio
+  const filteredCoursesByLanguage = useMemo(() => {
+    if (courseFilterLanguage === 'ALL') return courses;
+    return courses.filter(
+      (c) => (c.targetLanguage || 'Japanese').toLowerCase() === courseFilterLanguage.toLowerCase()
+    );
+  }, [courses, courseFilterLanguage]);
+
   if (!isAdmin) {
     return (
       <div style={styles.container}>
-        <div style={styles.authGateCard} className="animate-fade">
+        <div style={{ maxWidth: '500px', margin: '40px auto' }}>
+          <button
+            type="button"
+            onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+            className="btn-back"
+            style={{ marginBottom: '16px' }}
+            title="Return to site"
+          >
+            <ArrowLeft size={16} />
+            <span>Back to Site</span>
+          </button>
+
+          <div style={{ ...styles.authGateCard, margin: 0 }} className="animate-fade">
           <div style={styles.authGateHeader}>
             <div style={styles.authIconCircle}>
               <Shield size={32} color="var(--orenji-primary)" />
@@ -332,6 +395,7 @@ export const AdminPage: React.FC = () => {
               <span>Authenticate as Administrator</span>
             </button>
           </form>
+          </div>
         </div>
       </div>
     );
@@ -345,11 +409,11 @@ export const AdminPage: React.FC = () => {
           <div>
             <div style={styles.badge}>
               <Shield size={14} color="#EA580C" />
-              <span>Admin Studio & Dashboard (管理ポータル)</span>
+              <span>Multi-Culture Admin Studio (多文化管理ポータル)</span>
             </div>
-            <h1 style={styles.title}>Japanese Academy Command Center</h1>
+            <h1 style={styles.title}>Nyantaro Language Solutions Command Center</h1>
             <p style={styles.subtitle}>
-              Monitor active students, analyze platform traffic & engagement, and manage cultural modules with custom Japanese tags.
+              Monitor enrolled students, inspect multi-culture platform analytics, and manage video lectures across Japanese, Korean, Spanish, and French cultural academies.
             </p>
           </div>
 
@@ -367,6 +431,45 @@ export const AdminPage: React.FC = () => {
               <LogOut size={14} />
               <span>Sign Out</span>
             </button>
+          </div>
+        </div>
+
+        {/* Multi-Language Scope Switcher Bar */}
+        <div style={styles.scopeSwitcherBar}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
+              Language Scope (言語スコープ):
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => handleLanguageFilterChange('ALL')}
+              style={{
+                ...styles.scopeBtn,
+                ...(selectedLanguageFilter === 'ALL' ? styles.scopeBtnActive : {}),
+              }}
+            >
+              <span>🌐 Overall Solutions</span>
+              <span style={styles.scopeBadge}>All 4 Cultures</span>
+            </button>
+            {LANGUAGES_SUPPORTED.map((lang) => {
+              const isSelected = selectedLanguageFilter === lang.id;
+              return (
+                <button
+                  key={lang.id}
+                  type="button"
+                  onClick={() => handleLanguageFilterChange(lang.id)}
+                  style={{
+                    ...styles.scopeBtn,
+                    ...(isSelected ? styles.scopeBtnActive : {}),
+                  }}
+                >
+                  <span>{lang.flag} Nyantaro {lang.native}</span>
+                  <span style={styles.scopeBadge}>{lang.name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -408,7 +511,7 @@ export const AdminPage: React.FC = () => {
           </button>
 
           <button
-            onClick={loadAllDashboardData}
+            onClick={() => loadAllDashboardData()}
             className="btn-secondary"
             style={{ marginLeft: 'auto', padding: '8px 14px', fontSize: '12px', gap: 6 }}
             title="Refresh All Data"
@@ -439,6 +542,97 @@ export const AdminPage: React.FC = () => {
           ========================================================================= */}
       {activeTab === 'analytics' && (
         <div className="animate-fade">
+          {/* Active Language Scope Banner */}
+          {selectedLanguageFilter !== 'ALL' && (
+            <div style={styles.scopedBanner}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: '24px' }}>
+                  {LANGUAGES_SUPPORTED.find((l) => l.id === selectedLanguageFilter)?.flag || '🌐'}
+                </span>
+                <div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                    Viewing Filtered Analytics: <strong>{selectedLanguageFilter} Culture Academy</strong>
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                    KPIs, viewership telemetry, revenue estimation, and category rankings are filtered specifically for {selectedLanguageFilter}.
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleLanguageFilterChange('ALL')}
+                className="btn-secondary"
+                style={{ padding: '6px 14px', fontSize: '12px' }}
+              >
+                Reset to Overall Platform
+              </button>
+            </div>
+          )}
+
+          {/* Global Multi-Culture Distribution Cards (shown when ALL is selected) */}
+          {selectedLanguageFilter === 'ALL' && (
+            <div style={styles.langStatsSection}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <div>
+                  <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+                    Global Cultural Academy Footprint & Market Share
+                  </h2>
+                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+                    Telemetry distribution across all 4 living culture academies
+                  </p>
+                </div>
+                <span className="badge-blue" style={{ fontSize: '11px' }}>Platform-wide aggregate</span>
+              </div>
+
+              <div style={styles.langCardsGrid}>
+                {(stats?.languageStats || []).map((ls) => (
+                  <div key={ls.language} style={styles.langStatCard}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: '26px' }}>{ls.flag}</span>
+                        <div>
+                          <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)' }}>{ls.language}</div>
+                          <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--orenji-primary)', fontFamily: "'Noto Sans JP', sans-serif" }}>
+                            {ls.nativeName}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '18px', fontWeight: 900, color: 'var(--orenji-primary)' }}>{ls.sharePercentage}%</div>
+                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>share</div>
+                      </div>
+                    </div>
+
+                    <div style={{ ...styles.progressBarTrack, marginBottom: 12 }}>
+                      <div
+                        style={{
+                          ...styles.progressBarFill,
+                          width: `${ls.sharePercentage}%`,
+                          backgroundColor: 'var(--orenji-primary)',
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: 12 }}>
+                      <span>📚 <strong>{ls.coursesCount}</strong> Courses</span>
+                      <span>🎥 <strong>{ls.lessonsCount}</strong> Lectures</span>
+                      <span>👥 <strong>{ls.estimatedLearners}</strong> Learners</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleLanguageFilterChange(ls.language)}
+                      style={styles.langCardBtn}
+                    >
+                      <span>Monitor {ls.language}</span>
+                      <ArrowUpRight size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* 5 KPI Metric Cards */}
           <div style={styles.kpiGrid}>
             <div style={styles.kpiCard}>
@@ -846,18 +1040,33 @@ export const AdminPage: React.FC = () => {
               <div style={styles.cardHeader}>
                 <div style={styles.iconSquare}><Plus size={18} color="#EA580C" /></div>
                 <div>
-                  <h2 style={styles.cardTitle}>1. Create Japanese Category</h2>
-                  <p style={styles.cardSub}>e.g. Travel, Food, JLPT Grammar, Festivals</p>
+                  <h2 style={styles.cardTitle}>1. Create Cultural Category & Module</h2>
+                  <p style={styles.cardSub}>Select culture, native badge, and course title</p>
                 </div>
               </div>
 
               <form onSubmit={handleCreateCategory} style={styles.form}>
                 <div style={styles.field}>
-                  <label style={styles.label}>Category Name</label>
+                  <label style={styles.label}>Target Culture / Language (対象言語)</label>
+                  <select
+                    value={newCategory.targetLanguage || 'Japanese'}
+                    onChange={(e) => setNewCategory({ ...newCategory, targetLanguage: e.target.value })}
+                    style={styles.select}
+                  >
+                    {LANGUAGES_SUPPORTED.map((l) => (
+                      <option key={l.id} value={l.id}>
+                        {l.flag} {l.name} ({l.native})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={styles.field}>
+                  <label style={styles.label}>Category Name (テーマ分類)</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Food & Washoku or Japanese Dialects"
+                    placeholder="e.g. Food & Gastronomy or Transit & Travel"
                     value={newCategory.category}
                     onChange={(e) => setNewCategory({ ...newCategory, category: e.target.value })}
                     style={styles.input}
@@ -869,7 +1078,7 @@ export const AdminPage: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Street Food in Osaka: Kansai Culture"
+                    placeholder="e.g. Street Food Masterclass & Night Markets"
                     value={newCategory.title}
                     onChange={(e) => setNewCategory({ ...newCategory, title: e.target.value })}
                     style={styles.input}
@@ -877,11 +1086,11 @@ export const AdminPage: React.FC = () => {
                 </div>
 
                 <div style={styles.field}>
-                  <label style={styles.label}>Japanese Badge Tag (Kanji / Kana)</label>
+                  <label style={styles.label}>Native Cultural Badge (Kanji / Hangul / Script)</label>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <input
                       type="text"
-                      placeholder="e.g. 語学, 和食, 旅行, ポップ"
+                      placeholder="e.g. 語学, 和食, 한식, 한류, Tapas, Cuisine"
                       value={newCategory.japaneseTag || ''}
                       onChange={(e) => setNewCategory({ ...newCategory, japaneseTag: e.target.value })}
                       style={{ ...styles.input, flex: 1, fontFamily: "'Noto Sans JP', sans-serif", fontWeight: 700 }}
@@ -894,7 +1103,7 @@ export const AdminPage: React.FC = () => {
                   </div>
                   <div style={styles.quickTagsRow}>
                     <span style={styles.quickTagsLabel}>Quick Pick:</span>
-                    {['語学', '和食', '旅行', 'ポップ', '伝統', 'アニメ', '日常', '祭り'].map((tag) => (
+                    {(QUICK_TAGS_BY_LANG[newCategory.targetLanguage || 'Japanese'] || QUICK_TAGS_BY_LANG.Japanese).map((tag) => (
                       <button
                         key={tag}
                         type="button"
@@ -916,7 +1125,7 @@ export const AdminPage: React.FC = () => {
                   <label style={styles.label}>Description</label>
                   <textarea
                     rows={3}
-                    placeholder="Describe what students will learn about this aspect of Japan..."
+                    placeholder="Describe what students will learn about this cultural aspect..."
                     value={newCategory.description}
                     onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
                     style={styles.textarea}
@@ -950,7 +1159,7 @@ export const AdminPage: React.FC = () => {
                   >
                     {courses.map((c) => (
                       <option key={c.id} value={c.id}>
-                        {c.japaneseTag ? `[${c.japaneseTag}] ` : ''}{c.language}: {c.title}
+                        [{c.targetLanguage || 'Japanese'}] {c.japaneseTag ? `[${c.japaneseTag}] ` : ''}{c.language}: {c.title}
                       </option>
                     ))}
                   </select>
@@ -1008,12 +1217,46 @@ export const AdminPage: React.FC = () => {
           {/* Category & Lecture Management Tree */}
           <div style={styles.manageSection}>
             <div style={styles.manageHeader}>
-              <Layers size={20} color="#EA580C" />
-              <h2 style={{ fontSize: '20px', fontWeight: 700 }}>Existing Categories & Video Lectures ({courses.length})</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Layers size={20} color="#EA580C" />
+                <h2 style={{ fontSize: '20px', fontWeight: 700 }}>
+                  Cultural Modules & Video Lectures ({filteredCoursesByLanguage.length})
+                </h2>
+              </div>
+
+              {/* Language Filter Tabs inside Course Studio */}
+              <div style={styles.courseLangFilterRow}>
+                <button
+                  type="button"
+                  onClick={() => setCourseFilterLanguage('ALL')}
+                  style={{
+                    ...styles.courseLangPill,
+                    ...(courseFilterLanguage === 'ALL' ? styles.courseLangPillActive : {}),
+                  }}
+                >
+                  All ({courses.length})
+                </button>
+                {LANGUAGES_SUPPORTED.map((l) => {
+                  const count = courses.filter((c) => (c.targetLanguage || 'Japanese').toLowerCase() === l.id.toLowerCase()).length;
+                  return (
+                    <button
+                      key={l.id}
+                      type="button"
+                      onClick={() => setCourseFilterLanguage(l.id)}
+                      style={{
+                        ...styles.courseLangPill,
+                        ...(courseFilterLanguage === l.id ? styles.courseLangPillActive : {}),
+                      }}
+                    >
+                      {l.flag} {l.name} ({count})
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div style={styles.categoryList}>
-              {courses.map((course) => {
+              {filteredCoursesByLanguage.map((course) => {
                 const isExpanded = expandedCourseId === course.id;
                 const lessons = courseLessons[course.id] || [];
 
@@ -1026,6 +1269,15 @@ export const AdminPage: React.FC = () => {
                         </button>
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                            <span className="badge-pro" style={{ fontSize: '10px', padding: '2px 8px' }}>
+                              {course.targetLanguage === 'Korean'
+                                ? '🇰🇷 Korean'
+                                : course.targetLanguage === 'Spanish'
+                                ? '🇪🇸 Spanish'
+                                : course.targetLanguage === 'French'
+                                ? '🇫🇷 French'
+                                : '🇯🇵 Japanese'}
+                            </span>
                             <span className="catalog-kanji-badge" style={{ height: '26px', minWidth: '32px', fontSize: '11px', padding: '0 6px' }}>
                               {course.japaneseTag || '語学'}
                             </span>
@@ -1117,8 +1369,8 @@ export const AdminPage: React.FC = () => {
                   <Edit3 size={18} color="var(--orenji-primary)" />
                 </div>
                 <div>
-                  <h2 style={styles.modalTitle}>Edit Category & Japanese Badge</h2>
-                  <p style={styles.modalSub}>Update the Japanese badge tag and category details</p>
+                  <h2 style={styles.modalTitle}>Edit Cultural Category & Native Badge</h2>
+                  <p style={styles.modalSub}>Update target culture, native script tag, and course details</p>
                 </div>
               </div>
               <button
@@ -1132,12 +1384,27 @@ export const AdminPage: React.FC = () => {
 
             <form onSubmit={handleUpdateCategory} style={styles.form}>
               <div style={styles.field}>
-                <label style={styles.label}>Japanese Badge Tag (Kanji / Kana)</label>
+                <label style={styles.label}>Target Culture / Language (対象言語)</label>
+                <select
+                  value={editFormData.targetLanguage || 'Japanese'}
+                  onChange={(e) => setEditFormData({ ...editFormData, targetLanguage: e.target.value })}
+                  style={styles.select}
+                >
+                  {LANGUAGES_SUPPORTED.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.flag} {l.name} ({l.native})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={styles.field}>
+                <label style={styles.label}>Native Cultural Badge (Kanji / Hangul / Script)</label>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. 語学, 和食, 旅行, ポップ, アニメ"
+                    placeholder="e.g. 語学, 和食, 한식, 한류, Tapas, Cuisine"
                     value={editFormData.japaneseTag}
                     onChange={(e) => setEditFormData({ ...editFormData, japaneseTag: e.target.value })}
                     style={{ ...styles.input, flex: 1, fontFamily: "'Noto Sans JP', sans-serif", fontWeight: 700 }}
@@ -1148,7 +1415,7 @@ export const AdminPage: React.FC = () => {
                 </div>
                 <div style={styles.quickTagsRow}>
                   <span style={styles.quickTagsLabel}>Quick Pick:</span>
-                  {['語学', '和食', '旅行', 'ポップ', '伝統', 'アニメ', '日常', '祭り'].map((tag) => (
+                  {(QUICK_TAGS_BY_LANG[editFormData.targetLanguage || 'Japanese'] || QUICK_TAGS_BY_LANG.Japanese).map((tag) => (
                     <button
                       key={tag}
                       type="button"
@@ -1289,6 +1556,122 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: '1px solid var(--border-subtle)',
     paddingBottom: '12px',
     flexWrap: 'wrap',
+  },
+  scopeSwitcherBar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: '12px',
+    backgroundColor: '#FFFFFF',
+    border: '1px solid var(--border-subtle)',
+    borderRadius: 'var(--radius-lg)',
+    padding: '12px 18px',
+    marginTop: '20px',
+    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.03)',
+  },
+  scopeBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '8px 14px',
+    borderRadius: 'var(--radius-full)',
+    border: '1px solid var(--border-subtle)',
+    backgroundColor: 'var(--bg-subtle)',
+    color: 'var(--text-secondary)',
+    fontSize: '13px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+  },
+  scopeBtnActive: {
+    backgroundColor: 'var(--orenji-primary)',
+    color: '#FFFFFF',
+    borderColor: 'var(--orenji-primary)',
+    boxShadow: '0 2px 8px var(--orenji-glow)',
+  },
+  scopeBadge: {
+    fontSize: '11px',
+    padding: '1px 6px',
+    borderRadius: '4px',
+    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+    fontFamily: "'Noto Sans JP', sans-serif",
+  },
+  scopedBanner: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: '16px',
+    padding: '16px 20px',
+    borderRadius: 'var(--radius-lg)',
+    backgroundColor: 'var(--orenji-light)',
+    border: '1px solid #FFEDD5',
+    marginBottom: '24px',
+  },
+  langStatsSection: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 'var(--radius-lg)',
+    border: '1px solid var(--border-subtle)',
+    padding: '24px',
+    marginBottom: '28px',
+    boxShadow: 'var(--shadow-sm)',
+  },
+  langCardsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+    gap: '18px',
+  },
+  langStatCard: {
+    backgroundColor: 'var(--bg-subtle)',
+    border: '1px solid var(--border-subtle)',
+    borderRadius: 'var(--radius-md)',
+    padding: '16px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+  langCardBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '6px',
+    width: '100%',
+    padding: '7px 12px',
+    borderRadius: '6px',
+    backgroundColor: '#FFFFFF',
+    border: '1px solid var(--border-subtle)',
+    color: 'var(--text-primary)',
+    fontSize: '12px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+  },
+  courseLangFilterRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    flexWrap: 'wrap',
+  },
+  courseLangPill: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
+    padding: '4px 10px',
+    borderRadius: '9999px',
+    border: '1px solid var(--border-subtle)',
+    backgroundColor: '#FFFFFF',
+    color: 'var(--text-secondary)',
+    fontSize: '12px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+  },
+  courseLangPillActive: {
+    backgroundColor: 'var(--orenji-primary)',
+    borderColor: 'var(--orenji-primary)',
+    color: '#FFFFFF',
+    boxShadow: '0 1px 4px var(--orenji-glow)',
   },
   tabBtn: {
     display: 'inline-flex',

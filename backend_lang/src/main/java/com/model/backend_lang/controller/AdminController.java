@@ -23,10 +23,11 @@ public class AdminController {
 
     @GetMapping("/stats")
     public ResponseEntity<AdminStatsResponse> getPlatformStats(
-            @RequestHeader(value = "X-Admin-Key", required = false) String adminKey
+            @RequestHeader(value = "X-Admin-Key", required = false) String adminKey,
+            @RequestParam(value = "language", required = false) String language
     ) {
         verifyAdminAccess(adminKey);
-        AdminStatsResponse stats = adminService.getPlatformStats();
+        AdminStatsResponse stats = adminService.getPlatformStats(language);
         return ResponseEntity.ok(stats);
     }
 
@@ -59,6 +60,7 @@ public class AdminController {
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof UserPrincipal principal) {
             boolean isAdmin = principal.getAuthorities().stream()
                     .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()))
+                    || "admin@nyantaro.com".equalsIgnoreCase(principal.getEmail())
                     || "admin@japan.com".equalsIgnoreCase(principal.getEmail())
                     || "admin".equalsIgnoreCase(principal.getActualUsername())
                     || "admin".equalsIgnoreCase(principal.getUsername());

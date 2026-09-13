@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CourseResponse {
     private Long id;
+    private String targetLanguage;
     private String language;
     private String category;
     private String title;

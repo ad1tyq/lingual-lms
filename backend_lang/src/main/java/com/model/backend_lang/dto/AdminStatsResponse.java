@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminStatsResponse {
+    private String activeLanguage;
     private long totalStudents;
     private long proMembers;
     private long freeMembers;
@@ -24,6 +25,7 @@ public class AdminStatsResponse {
 
     private List<DailyTrafficPoint> weeklyTraffic;
     private List<CategoryStatItem> categoryStats;
+    private List<LanguageStatItem> languageStats;
 
     @Data
     @Builder
@@ -42,9 +44,24 @@ public class AdminStatsResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CategoryStatItem {
+        private String targetLanguage;
         private String category;
         private String japaneseTag;
         private int views;
         private int percentage;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LanguageStatItem {
+        private String language;
+        private String nativeName;
+        private String flag;
+        private long coursesCount;
+        private long lessonsCount;
+        private int estimatedLearners;
+        private int sharePercentage;
     }
 }

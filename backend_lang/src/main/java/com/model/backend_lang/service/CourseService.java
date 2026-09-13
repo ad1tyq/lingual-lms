@@ -25,9 +25,16 @@ public class CourseService {
     private final LessonRepository lessonRepository;
 
     @Transactional(readOnly = true)
-    public List<CourseResponse> getAllCourses(String category) {
+    public List<CourseResponse> getAllCourses(String targetLanguage, String category) {
         List<Course> courses;
-        if (category != null && !category.trim().isEmpty()) {
+        boolean hasTargetLang = targetLanguage != null && !targetLanguage.trim().isEmpty() && !"ALL".equalsIgnoreCase(targetLanguage.trim());
+        boolean hasCategory = category != null && !category.trim().isEmpty() && !"ALL".equalsIgnoreCase(category.trim());
+
+        if (hasTargetLang && hasCategory) {
+            courses = courseRepository.findByTargetLanguageIgnoreCaseAndLanguageIgnoreCase(targetLanguage.trim(), category.trim());
+        } else if (hasTargetLang) {
+            courses = courseRepository.findByTargetLanguageIgnoreCase(targetLanguage.trim());
+        } else if (hasCategory) {
             courses = courseRepository.findByLanguageIgnoreCase(category.trim());
         } else {
             courses = courseRepository.findAll();
@@ -35,6 +42,19 @@ public class CourseService {
 
         return courses.stream()
                 .map(this::mapToCourseResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CourseResponse> getAllCourses(String category) {
+        return getAllCourses(null, category);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getAvailableLanguages() {
+        return courseRepository.findAll().stream()
+                .map(c -> c.getTargetLanguage() != null ? c.getTargetLanguage() : "Japanese")
+                .distinct()
                 .collect(Collectors.toList());
     }
 
@@ -52,6 +72,7 @@ public class CourseService {
                 : null;
 
         Course course = Course.builder()
+                .targetLanguage(request.getEffectiveTargetLanguage())
                 .language(request.getEffectiveCategory())
                 .title(request.getTitle().trim())
                 .description(request.getDescription())
@@ -67,6 +88,9 @@ public class CourseService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course/Category not found with id: " + courseId));
 
+        if (request.getTargetLanguage() != null && !request.getTargetLanguage().trim().isEmpty()) {
+            course.setTargetLanguage(request.getEffectiveTargetLanguage());
+        }
         course.setLanguage(request.getEffectiveCategory());
         course.setTitle(request.getTitle().trim());
         course.setDescription(request.getDescription());
@@ -131,6 +155,7 @@ public class CourseService {
 
         return CourseResponse.builder()
                 .id(course.getId())
+                .targetLanguage(course.getTargetLanguage() != null ? course.getTargetLanguage() : "Japanese")
                 .language(course.getLanguage())
                 .category(course.getLanguage())
                 .title(course.getTitle())
