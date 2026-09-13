@@ -50,6 +50,7 @@ public class LessonController {
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof UserPrincipal principal) {
             boolean isAdmin = principal.getAuthorities().stream()
                     .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()))
+                    || "admin@nyantaro.com".equalsIgnoreCase(principal.getEmail())
                     || "admin@japan.com".equalsIgnoreCase(principal.getEmail());
             if (isAdmin) {
                 return;

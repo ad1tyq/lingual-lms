@@ -1,9 +1,10 @@
 import { request } from './client';
 import type { AdminStats, AdminUser } from '../types/admin';
 
-export async function getAdminStats(): Promise<AdminStats> {
+export async function getAdminStats(language?: string): Promise<AdminStats> {
   return request<AdminStats>('/api/admin/stats', {
     method: 'GET',
+    params: { language: language && language !== 'ALL' ? language : undefined },
     headers: {
       'X-Admin-Key': 'admin_japan_secret_key_2026',
     },

@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
     List<Course> findByLanguageIgnoreCase(String language);
+    List<Course> findByTargetLanguageIgnoreCase(String targetLanguage);
+    List<Course> findByTargetLanguageIgnoreCaseAndLanguageIgnoreCase(String targetLanguage, String language);
 }

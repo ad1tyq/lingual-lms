@@ -1,5 +1,6 @@
 export interface Course {
   id: number;
+  targetLanguage?: string;
   language: string;
   category?: string;
   title: string;
@@ -10,6 +11,7 @@ export interface Course {
 }
 
 export interface CreateCourseData {
+  targetLanguage?: string;
   category: string;
   title: string;
   description: string;

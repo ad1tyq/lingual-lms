@@ -19,13 +19,25 @@ export interface DailyTrafficPoint {
 }
 
 export interface CategoryStatItem {
+  targetLanguage?: string;
   category: string;
   japaneseTag: string;
   views: number;
   percentage: number;
 }
 
+export interface LanguageStatItem {
+  language: string;
+  nativeName: string;
+  flag: string;
+  coursesCount: number;
+  lessonsCount: number;
+  estimatedLearners: number;
+  sharePercentage: number;
+}
+
 export interface AdminStats {
+  activeLanguage?: string;
   totalStudents: number;
   proMembers: number;
   freeMembers: number;
@@ -37,4 +49,5 @@ export interface AdminStats {
   proConversionRate: number;
   weeklyTraffic: DailyTrafficPoint[];
   categoryStats: CategoryStatItem[];
+  languageStats?: LanguageStatItem[];
 }

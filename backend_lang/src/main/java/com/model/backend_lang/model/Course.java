@@ -22,6 +22,10 @@ public class Course {
     @Column(nullable = false)
     private String language;
 
+    @Column(name = "target_language", nullable = false)
+    @Builder.Default
+    private String targetLanguage = "Japanese";
+
     @Column(nullable = false)
     private String title;
 

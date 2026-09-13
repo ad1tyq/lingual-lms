@@ -25,12 +25,31 @@ public class CourseController {
 
     @GetMapping
     public ResponseEntity<List<CourseResponse>> getAllCourses(
+            @RequestParam(value = "targetLanguage", required = false) String targetLanguage,
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "language", required = false) String language
     ) {
-        String filter = (category != null && !category.trim().isEmpty()) ? category : language;
-        List<CourseResponse> courses = courseService.getAllCourses(filter);
+        // If targetLanguage isn't passed, but language is passed as "Japanese", "Korean", "Spanish", "French":
+        String effectiveTargetLang = targetLanguage;
+        String effectiveCategory = category;
+
+        if (effectiveTargetLang == null && language != null) {
+            String l = language.trim().toLowerCase();
+            if (l.equals("japanese") || l.equals("korean") || l.equals("spanish") || l.equals("french")) {
+                effectiveTargetLang = language;
+            } else {
+                effectiveCategory = language;
+            }
+        }
+
+        List<CourseResponse> courses = courseService.getAllCourses(effectiveTargetLang, effectiveCategory);
         return ResponseEntity.ok(courses);
+    }
+
+    @GetMapping("/languages")
+    public ResponseEntity<List<String>> getAvailableLanguages() {
+        List<String> languages = courseService.getAvailableLanguages();
+        return ResponseEntity.ok(languages);
     }
 
     @GetMapping("/{id}")
@@ -95,6 +114,7 @@ public class CourseController {
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof UserPrincipal principal) {
             boolean isAdmin = principal.getAuthorities().stream()
                     .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()))
+                    || "admin@nyantaro.com".equalsIgnoreCase(principal.getEmail())
                     || "admin@japan.com".equalsIgnoreCase(principal.getEmail());
             if (isAdmin) {
                 return;

@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateCourseRequest {
 
+    private String targetLanguage;
     private String category;
     private String language; // fallback if category is passed as language
 
@@ -21,6 +22,13 @@ public class CreateCourseRequest {
     private String description;
     private String japaneseTag;
 
+    public String getEffectiveTargetLanguage() {
+        if (targetLanguage != null && !targetLanguage.trim().isEmpty()) {
+            return targetLanguage.trim();
+        }
+        return "Japanese";
+    }
+
     public String getEffectiveCategory() {
         if (category != null && !category.trim().isEmpty()) {
             return category.trim();
@@ -28,6 +36,6 @@ public class CreateCourseRequest {
         if (language != null && !language.trim().isEmpty()) {
             return language.trim();
         }
-        return "Japanese Culture";
+        return "General Culture";
     }
 }

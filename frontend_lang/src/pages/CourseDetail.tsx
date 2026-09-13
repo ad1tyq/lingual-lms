@@ -6,6 +6,7 @@ import type { LessonSummary } from '../types/lesson';
 import { useAuth } from '../context/AuthContext';
 import { useModal } from '../context/ModalContext';
 import { Play, Lock, CheckCircle2, ArrowLeft, Video, Sparkles } from 'lucide-react';
+import { ProgressBar } from '../components/ProgressBar';
 
 export const CourseDetail: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -55,13 +56,17 @@ export const CourseDetail: React.FC = () => {
     }
   };
 
+  const completedCount = lessons.filter((l) => l.completed).length;
+  const totalCount = lessons.length;
+  const nextLessonToPlay = lessons.find((l) => !l.completed && !l.locked) || lessons[0];
+
   const startFirstLesson = () => {
     if (!user) {
       navigate('/login?mode=register');
       return;
     }
     if (lessons.length > 0) {
-      handleLessonClick(lessons[0]);
+      handleLessonClick(nextLessonToPlay);
     }
   };
 
@@ -88,14 +93,23 @@ export const CourseDetail: React.FC = () => {
 
   return (
     <div className="course-detail-container" style={styles.container}>
-      <Link to="/" className="course-detail-back" style={styles.backLink}>
-        <ArrowLeft size={16} /> Back to all categories
+      <Link
+        to={course?.targetLanguage ? `/languages/${course.targetLanguage.toLowerCase()}` : '/'}
+        className="course-detail-back"
+        style={styles.backLink}
+      >
+        <ArrowLeft size={16} /> Back to {course?.targetLanguage ? `Nyantaro ${course.targetLanguage}` : 'all courses'}
       </Link>
 
       {/* Hero Header */}
       <div className="course-detail-hero" style={styles.heroCard}>
         <div className="course-detail-content" style={styles.heroContent}>
           <div className="course-detail-badge-row" style={styles.badgeRow}>
+            {course.targetLanguage && (
+              <span className="badge-pro" style={{ fontSize: '11px', padding: '3px 8px' }}>
+                Nyantaro {course.targetLanguage}
+              </span>
+            )}
             {course.japaneseTag && (
               <span className="catalog-kanji-badge" style={{ height: '26px', minWidth: '34px', fontSize: '12px', padding: '0 8px' }}>
                 {course.japaneseTag}
@@ -108,10 +122,24 @@ export const CourseDetail: React.FC = () => {
           <h1 className="course-detail-title" style={styles.title}>{course.title}</h1>
           <p className="course-detail-desc" style={styles.description}>{course.description}</p>
 
+          {totalCount > 0 && (
+            <div style={styles.progressBox}>
+              <ProgressBar completed={completedCount} total={totalCount} />
+            </div>
+          )}
+
           <div className="course-detail-actions" style={styles.heroActions}>
             <button onClick={startFirstLesson} className="btn-primary" style={{ padding: '12px 24px', fontSize: '15px' }}>
               <Play size={18} fill="#fff" />
-              <span>{user ? 'Start Course (Lesson #1)' : 'Sign In to Start Course'}</span>
+              <span>
+                {user
+                  ? completedCount > 0
+                    ? completedCount === totalCount
+                      ? 'Review Course (Lesson #1)'
+                      : `Resume Course (Lesson #${nextLessonToPlay?.sequenceNo || 1})`
+                    : 'Start Course (Lesson #1)'
+                  : 'Sign In to Start Course'}
+              </span>
             </button>
 
             {user && user?.subscriptionStatus !== 'PRO' && (
@@ -131,12 +159,17 @@ export const CourseDetail: React.FC = () => {
       {/* Syllabus Table */}
       <div className="course-detail-syllabus" style={styles.syllabusSection}>
         <div style={styles.syllabusHeader}>
-          <div>
+          <div style={{ flex: 1, minWidth: '220px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--text-primary)' }}>Category Syllabus & Lectures</h2>
             <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: 4 }}>
               {lessons.length} video lectures available. {user ? `First ${course.freeLessonsCount} lectures are free preview.` : 'Sign in to watch free preview lectures.'}
             </p>
           </div>
+          {totalCount > 0 && (
+            <div style={styles.syllabusProgressWrapper}>
+              <ProgressBar completed={completedCount} total={totalCount} />
+            </div>
+          )}
         </div>
 
         <div className="course-detail-lesson-list" style={styles.lessonList}>
@@ -264,6 +297,14 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '16px',
     flexWrap: 'wrap',
   },
+  progressBox: {
+    backgroundColor: 'var(--bg-subtle)',
+    borderRadius: '12px',
+    padding: '14px 18px',
+    border: '1px solid var(--border-subtle)',
+    maxWidth: '520px',
+    marginBottom: '24px',
+  },
   syllabusSection: {
     backgroundColor: 'var(--shiro)',
     borderRadius: 'var(--radius-lg)',
@@ -275,6 +316,16 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '24px',
     borderBottom: '1px solid var(--border-subtle)',
     backgroundColor: 'var(--bg-subtle)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '24px',
+    flexWrap: 'wrap',
+  },
+  syllabusProgressWrapper: {
+    minWidth: '220px',
+    maxWidth: '300px',
+    width: '100%',
   },
   lessonList: {
     display: 'flex',

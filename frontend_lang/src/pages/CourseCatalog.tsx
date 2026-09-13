@@ -1,11 +1,89 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { getCourses } from '../api/courses';
 import type { Course } from '../types/course';
-import { ArrowRight, Layers, Utensils, Compass, BookOpen, Film, Flame } from 'lucide-react';
-import { CatLogo } from '../components/CatLogo';
+import {
+  ArrowRight, Layers, Utensils, Compass, BookOpen, Film, Flame,
+  ArrowLeft
+} from 'lucide-react';
+import { CultureMascot } from '../components/CultureMascot';
+
+interface CultureMeta {
+  targetLanguage: string;
+  name: string;
+  nativeName: string;
+  badge: string;
+  flag: string;
+  titlePrefix: string;
+  titleHighlight: string;
+  subtitle: string;
+  categoryLabel: string;
+}
+
+const CULTURE_CONFIGS: Record<string, CultureMeta> = {
+  japanese: {
+    targetLanguage: 'Japanese',
+    name: 'Japanese',
+    nativeName: '日本語',
+    badge: 'Nyantaro • 日本語',
+    flag: '🇯🇵',
+    titlePrefix: 'Nyantaro 日本語: Explore ',
+    titleHighlight: 'Japanese Culture & Language',
+    subtitle: 'Immerse yourself in authentic Japanese culture through curated video lectures — from Hiragana & Kanji mastery to traditional Washoku culinary arts, travel secrets, and modern pop culture.',
+    categoryLabel: 'Japanese Culture Categories (文化カテゴリー)',
+  },
+  korean: {
+    targetLanguage: 'Korean',
+    name: 'Korean',
+    nativeName: '한국어',
+    badge: 'Nyantaro • 한국어',
+    flag: '🇰🇷',
+    titlePrefix: 'Nyantaro 한국어: Explore ',
+    titleHighlight: 'Korean Culture & Language',
+    subtitle: 'Immerse yourself in authentic Korean culture through curated video lectures — from King Sejong’s scientific Hangul alphabet to traditional Kimchi, Seoul transit, and the global K-Pop Hallyu wave.',
+    categoryLabel: 'Korean Culture Categories (문화 카테고리)',
+  },
+  spanish: {
+    targetLanguage: 'Spanish',
+    name: 'Spanish',
+    nativeName: 'Español',
+    badge: 'Nyantaro • Español',
+    flag: '🇪🇸',
+    titlePrefix: 'Nyantaro Español: Explore ',
+    titleHighlight: 'Spanish Culture & Language',
+    subtitle: 'Immerse yourself in authentic Spanish culture through curated video lectures — from Castilian conversational fluency to Andalusian Flamenco, Tapas culinary artistry, and travel wonders.',
+    categoryLabel: 'Spanish Culture Categories (Categorías Culturales)',
+  },
+  french: {
+    targetLanguage: 'French',
+    name: 'French',
+    nativeName: 'Français',
+    badge: 'Nyantaro • Français',
+    flag: '🇫🇷',
+    titlePrefix: 'Nyantaro Français: Explore ',
+    titleHighlight: 'French Culture & Language',
+    subtitle: 'Immerse yourself in authentic French culture through curated video lectures — from melodic pronunciation and grammar to Parisian bistro dining, wine terroirs, and Impressionist art.',
+    categoryLabel: 'French Culture Categories (Catégories Culturelles)',
+  },
+};
 
 export const CourseCatalog: React.FC = () => {
+  const { languageId } = useParams<{ languageId?: string }>();
+  const navigate = useNavigate();
+
+  const activeKey = (languageId || 'japanese').toLowerCase();
+  const currentCulture = CULTURE_CONFIGS[activeKey] || {
+    targetLanguage: activeKey.charAt(0).toUpperCase() + activeKey.slice(1),
+    name: activeKey.charAt(0).toUpperCase() + activeKey.slice(1),
+    nativeName: activeKey.toUpperCase(),
+    badge: activeKey.toUpperCase(),
+    flag: '🌐',
+    titlePrefix: `Explore ${activeKey.charAt(0).toUpperCase() + activeKey.slice(1)} Culture & `,
+    titleHighlight: 'Master the Language',
+    subtitle: `Immerse yourself in authentic ${activeKey} culture through curated video lectures.`,
+    categoryLabel: `${activeKey.charAt(0).toUpperCase() + activeKey.slice(1)} Categories`,
+  };
+
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [loading, setLoading] = useState<boolean>(true);
@@ -13,16 +91,17 @@ export const CourseCatalog: React.FC = () => {
 
   useEffect(() => {
     fetchCourses();
-  }, []);
+    setSelectedCategory('ALL');
+  }, [currentCulture.targetLanguage]);
 
   const fetchCourses = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getCourses();
+      const data = await getCourses(undefined, currentCulture.targetLanguage);
       setCourses(data);
     } catch (err: any) {
-      setError(err.message || 'Failed to load Japanese culture modules');
+      setError(err.message || `Failed to load ${currentCulture.name} culture modules`);
     } finally {
       setLoading(false);
     }
@@ -39,42 +118,67 @@ export const CourseCatalog: React.FC = () => {
 
   const getCategoryIcon = (category: string) => {
     const c = category.toLowerCase();
-    if (c.includes('food') || c.includes('washoku') || c.includes('cuisine')) return <Utensils size={15} />;
-    if (c.includes('travel') || c.includes('tour') || c.includes('sightseeing')) return <Compass size={15} />;
-    if (c.includes('pop') || c.includes('anime') || c.includes('manga')) return <Film size={15} />;
-    if (c.includes('tradition') || c.includes('shinto') || c.includes('festival')) return <Flame size={15} />;
+    if (c.includes('food') || c.includes('washoku') || c.includes('cuisine') || c.includes('tapas')) return <Utensils size={15} />;
+    if (c.includes('travel') || c.includes('tour') || c.includes('sightseeing') || c.includes('seoul') || c.includes('paris') || c.includes('viaje')) return <Compass size={15} />;
+    if (c.includes('pop') || c.includes('anime') || c.includes('manga') || c.includes('hallyu') || c.includes('cinema') || c.includes('music')) return <Film size={15} />;
+    if (c.includes('tradition') || c.includes('shinto') || c.includes('festival') || c.includes('heritage') || c.includes('flamenco')) return <Flame size={15} />;
     return <BookOpen size={15} />;
-  };
-
-  const getCategoryKanji = (category: string) => {
-    const c = category.toLowerCase();
-    if (c.includes('food') || c.includes('washoku')) return '和食';
-    if (c.includes('travel') || c.includes('sightseeing')) return '旅行';
-    if (c.includes('pop') || c.includes('anime')) return 'ポップ';
-    if (c.includes('tradition')) return '伝統';
-    if (c.includes('language') || c.includes('writing')) return '語学';
-    return '日本';
   };
 
   return (
     <div className="catalog-container" style={styles.container}>
-      {/* Hero Banner with Big Cat Logo */}
+      {/* Top Bar: Hub Navigation & Quick Language Switcher */}
+      <div style={styles.topNavigationRow}>
+        <Link to="/" style={styles.backToHubLink}>
+          <ArrowLeft size={16} />
+          <span>All Nyantaro Solutions Hub (全言語)</span>
+        </Link>
+
+        {/* Language Switcher Pills */}
+        <div style={styles.langPillsWrapper}>
+          {Object.entries(CULTURE_CONFIGS).map(([key, config]) => {
+            const isCurrent = key === activeKey;
+            return (
+              <button
+                key={key}
+                onClick={() => navigate(`/languages/${key}`)}
+                style={{
+                  ...styles.langPillBtn,
+                  ...(isCurrent ? styles.langPillBtnActive : {}),
+                }}
+              >
+                <span>{config.flag}</span>
+                <span>Nyantaro {config.nativeName}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Hero Banner with Big Cultural Mascot */}
       <section className="catalog-hero" style={styles.hero}>
-        {/* BIG CAT LOGO (Maneki-Neko) */}
+        {/* Culture Mascot */}
         <div style={{ marginBottom: '24px' }}>
-          <CatLogo size={145} />
+          <CultureMascot language={currentCulture.targetLanguage} size={150} />
+        </div>
+
+        <div style={styles.badgeRow}>
+          <div className="catalog-kanji-badge" style={{ fontSize: '13px', padding: '5px 14px' }}>
+            {currentCulture.flag} {currentCulture.badge}
+          </div>
         </div>
 
         <h1 className="catalog-hero-title" style={styles.heroTitle}>
-          Explore Japanese Culture & <span style={{ color: 'var(--orenji-primary)' }}>Master the Language</span>
+          {currentCulture.titlePrefix}
+          <span style={{ color: 'var(--orenji-primary)' }}>{currentCulture.titleHighlight}</span>
         </h1>
         <p className="catalog-hero-subtitle" style={styles.heroSubtitle}>
-          Immerse yourself in authentic Japanese culture through curated video lectures — from Hiragana & Kanji mastery to traditional Washoku culinary arts, travel secrets, and modern pop culture.
+          {currentCulture.subtitle}
         </p>
 
-        {/* Categories Under the Big Cat Logo */}
+        {/* Categories Under the Culture Mascot */}
         <div style={{ marginTop: '28px', marginBottom: '8px' }}>
-          <span style={styles.categoriesLabel}>Japanese Culture Categories (文化カテゴリー)</span>
+          <span style={styles.categoriesLabel}>{currentCulture.categoryLabel}</span>
         </div>
 
         <div style={styles.filterRow}>
@@ -121,7 +225,7 @@ export const CourseCatalog: React.FC = () => {
             <div key={course.id} style={styles.card} className="catalog-card animate-fade">
               <div style={styles.cardHeader} className="catalog-card-header">
                 <div style={styles.kanjiBadge} className="catalog-kanji-badge">
-                  {course.japaneseTag || getCategoryKanji(course.language)}
+                  {course.japaneseTag || currentCulture.nativeName}
                 </div>
                 <span style={styles.catTag} className="catalog-cat-tag">{course.language}</span>
               </div>
@@ -145,7 +249,7 @@ export const CourseCatalog: React.FC = () => {
 
               <div style={styles.cardFooter}>
                 <Link to={`/courses/${course.id}`} className="btn-primary" style={{ width: '100%' }}>
-                  <span>Explore Category</span>
+                  <span>Enter Course & Watch Lectures</span>
                   <ArrowRight size={16} />
                 </Link>
               </div>
@@ -161,12 +265,64 @@ const styles: Record<string, React.CSSProperties> = {
   container: {
     maxWidth: '1200px',
     margin: '0 auto',
-    padding: '40px 24px 80px',
+    padding: '30px 24px 80px',
+  },
+  topNavigationRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '12px',
+    marginBottom: '28px',
+  },
+  backToHubLink: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '13px',
+    fontWeight: 600,
+    color: 'var(--text-secondary)',
+    textDecoration: 'none',
+    padding: '6px 12px',
+    borderRadius: '8px',
+    backgroundColor: 'var(--shiro)',
+    border: '1px solid var(--border-subtle)',
+    transition: 'all 0.15s ease',
+  },
+  langPillsWrapper: {
+    display: 'flex',
+    gap: '6px',
+    flexWrap: 'wrap',
+  },
+  langPillBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '6px 14px',
+    borderRadius: '9999px',
+    border: '1px solid var(--border-subtle)',
+    backgroundColor: '#FFFFFF',
+    color: 'var(--text-secondary)',
+    fontSize: '13px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+  },
+  langPillBtnActive: {
+    backgroundColor: 'var(--orenji-primary)',
+    borderColor: 'var(--orenji-primary)',
+    color: '#FFFFFF',
+    boxShadow: '0 2px 8px var(--orenji-glow)',
   },
   hero: {
     textAlign: 'center',
     maxWidth: '820px',
     margin: '0 auto 50px',
+  },
+  badgeRow: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '14px',
   },
   heroTitle: {
     fontSize: '44px',
@@ -218,69 +374,54 @@ const styles: Record<string, React.CSSProperties> = {
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
     gap: '24px',
   },
   card: {
     backgroundColor: 'var(--shiro)',
     borderRadius: 'var(--radius-lg)',
-    border: '1px solid var(--border-subtle)',
     padding: '24px',
+    border: '1px solid var(--border-subtle)',
+    boxShadow: 'var(--shadow-md)',
     display: 'flex',
     flexDirection: 'column',
-    boxShadow: 'var(--shadow-card)',
-    transition: 'transform 0.2s, border-color 0.2s, box-shadow 0.2s',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
   },
   cardHeader: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    marginBottom: '14px',
+    justifyContent: 'space-between',
+    marginBottom: '16px',
   },
   kanjiBadge: {
-    minWidth: '38px',
-    height: '32px',
-    padding: '0 8px',
-    borderRadius: '8px',
-    backgroundColor: 'var(--orenji-light)',
-    border: '1px solid var(--orenji-border)',
-    color: 'var(--orenji-primary)',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '13px',
-    fontWeight: '800',
-    letterSpacing: '0.4px',
-    whiteSpace: 'nowrap',
-    flexShrink: 0,
     fontFamily: "'Noto Sans JP', sans-serif",
   },
   catTag: {
     fontSize: '13px',
     fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: '0.6px',
     color: 'var(--orenji-primary)',
-    lineHeight: 1.2,
+    backgroundColor: 'var(--orenji-light)',
+    padding: '4px 10px',
+    borderRadius: 'var(--radius-sm)',
   },
   courseTitle: {
     fontSize: '20px',
     fontWeight: '700',
     color: 'var(--text-primary)',
     marginBottom: '10px',
-    lineHeight: 1.35,
+    lineHeight: 1.3,
   },
   courseDesc: {
     fontSize: '14px',
     color: 'var(--text-secondary)',
     lineHeight: 1.6,
-    flexGrow: 1,
-    marginBottom: '24px',
+    marginBottom: '20px',
+    flex: 1,
   },
   metaRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: '20px',
+    justifyContent: 'space-between',
     paddingTop: '16px',
     borderTop: '1px solid var(--border-subtle)',
     marginBottom: '20px',
@@ -291,34 +432,34 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '6px',
     fontSize: '13px',
     color: 'var(--text-secondary)',
+    fontWeight: '500',
   },
   cardFooter: {
     marginTop: 'auto',
   },
-  skeletonCard: {
-    height: '280px',
-    backgroundColor: 'var(--shiro)',
-    borderRadius: 'var(--radius-lg)',
-    border: '1px solid var(--border-subtle)',
-  },
   loadingGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-    gap: '28px',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+    gap: '24px',
   },
-  errorBox: {
-    textAlign: 'center',
-    padding: '40px',
-    color: '#DC2626',
-    backgroundColor: 'var(--danger-bg)',
-    borderRadius: 'var(--radius-md)',
-  },
-  emptyBox: {
-    textAlign: 'center',
-    padding: '60px 20px',
-    color: 'var(--text-secondary)',
-    backgroundColor: 'var(--shiro)',
+  skeletonCard: {
+    height: '280px',
+    backgroundColor: '#FFFFFF',
     borderRadius: 'var(--radius-lg)',
     border: '1px solid var(--border-subtle)',
+    opacity: 0.6,
+  },
+  errorBox: {
+    padding: '32px',
+    textAlign: 'center',
+    backgroundColor: '#FEF2F2',
+    border: '1px solid #FECACA',
+    borderRadius: 'var(--radius-md)',
+    color: '#DC2626',
+  },
+  emptyBox: {
+    padding: '60px 24px',
+    textAlign: 'center',
+    color: 'var(--text-secondary)',
   },
 };
